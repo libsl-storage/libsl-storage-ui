@@ -22,7 +22,7 @@ export default {
 .search-result-item {
     display: flex;
     padding: 1em;
-    margin: 0.5em 0em;
+    margin-bottom: 1.5em;
     border-radius: 0.5em;
     background-color: white;
     box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.2);
@@ -30,6 +30,6 @@ export default {
 
 .search-result-item:hover {
     cursor: pointer;
-    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.3);
 }
 </style>

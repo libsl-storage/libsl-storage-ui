@@ -22,6 +22,7 @@ html, body {
 	height: 100%;
 	margin: 0;
 	font-family: sans-serif;
+	-webkit-overflow-scrolling: auto; /* disable the inertial scrolling (mobile) */
 }
 
 #app {

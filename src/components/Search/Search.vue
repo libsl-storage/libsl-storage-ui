@@ -1,7 +1,7 @@
 <template>
     <div id="search">
         <div id="search-panel">
-            <InputText id="search-field" v-model="search_query" placeholder="Search" @keyup.enter="search" />
+            <InputText id="search-field" v-model="search_query" placeholder="Search" @keyup.enter="search" autofocus />
             <Button id="search-btn" icon="pi pi-search" title="Search" @click="search" />
             <Button v-show="isMobile" id="search-options-btn" icon="pi pi-sliders-h" title="Search options"
                 @click="search_options_mobile_visible = !search_options_mobile_visible" />
@@ -86,6 +86,7 @@ export default {
     display: flex;
     flex: 1;
     margin: 1em 0em;
+    padding: 0.2em 0.2em;
     overflow: auto;
 }
 
@@ -96,14 +97,14 @@ export default {
     padding: 1em 0.5em;
     border-radius: 0.25em;
     background-color: white;
-    box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.15);
+    box-shadow: 0px 0px 4px 1px rgba(0, 0, 0, 0.1);
     overflow: auto;
 }
 
 .search-options-panel-mobile {
     position: absolute;
     left: -120%; /* closed */
-    height: 100%;
+    height: 98%;
     width: 100% !important;
     transition-duration: 0.3s;
 }
@@ -116,7 +117,7 @@ export default {
     display: flex;
     flex-flow: column;
     flex: 1;
-    padding: 0em 1em 1em 1em;
+    padding: 1em;
     overflow: auto;
 }
 </style>

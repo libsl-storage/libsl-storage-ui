@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import wordlist from '@/components/CodeEditor/highlight'
 export default {
     props: {
         content: {
@@ -43,6 +44,7 @@ export default {
         }
     },
     mounted() {
+        // sync scroll in textarea, pre and row counter
         let code_el = document.getElementById("code")
         let row_counter_el = document.getElementById("row-counter")
         let highlighter_el = document.getElementById("highlighter")
@@ -53,6 +55,10 @@ export default {
             highlighter_el.scrollLeft = code_el.scrollLeft
         })
 
+        // load code highlight
+        this.key_words = RegExp(`(^|\\s|\\t|\\b)(${wordlist.join("|")})(\\s|\\t|\\b|$)`, "g")
+
+        // show initial content
         this.code = this.content
     },
     updated() {
@@ -71,7 +77,7 @@ export default {
             row_counter_content: "1",
             code: "",
             new_cursor_pos: null, // set the cursor after pressing Tab or Enter
-            key_words: /(^|\s|\t|\b)(library|import|types|automaton|fun|target|var|state|finishstate|new|shift|this|action|result|if|else|when)(\s|\t|\b|$)/g
+            key_words: null
         }
     },
     methods: {
@@ -102,6 +108,10 @@ export default {
             this.code = before_enter + "\n" + line_prefix + after_enter
             if (this.code.at(-1) == "\n") this.code += " " // for <pre />
             this.new_cursor_pos = code_el.selectionStart + 1 + line_prefix.length
+
+            // forced textarea scrolling
+            code_el.blur()
+            code_el.focus()
         }
     },
     watch: {

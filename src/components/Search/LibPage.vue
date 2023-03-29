@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import LibSLCodeEditor from '@/components/LibSLCodeEditor.vue'
+import LibSLCodeEditor from '@/components/CodeEditor/LibSLCodeEditor.vue'
 export default {
     name: "v-lib-page",
     components: {

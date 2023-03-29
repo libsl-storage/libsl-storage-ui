@@ -60,7 +60,7 @@ export default {
 #main {
     display: flex;
     flex: 1;
-    background-color: rgb(250, 250, 250);
+    background-color: rgb(245, 245, 245); /* #eff3f8; */
     overflow: auto;
 }
 </style>

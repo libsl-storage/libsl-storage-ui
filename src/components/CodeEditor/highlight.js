@@ -1,0 +1,19 @@
+export default [
+    "library",
+    "import",
+    "types",
+    "automaton",
+    "fun",
+    "target",
+    "var",
+    "state",
+    "finishstate",
+    "new",
+    "shift",
+    "this",
+    "action",
+    "result",
+    "if",
+    "else",
+    "when"
+]
