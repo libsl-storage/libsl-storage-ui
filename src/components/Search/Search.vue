@@ -1,24 +1,32 @@
 <template>
     <div id="search">
-        <div id="search-panel">
+        <div id="top-panel">
             <InputText id="search-field" v-model="search_query" placeholder="Search" @keyup.enter="search" autofocus />
             <Button id="search-btn" icon="pi pi-search" title="Search" @click="search" />
             <Button v-show="isMobile" id="search-options-btn" icon="pi pi-sliders-h" title="Search options"
                 @click="search_options_mobile_visible = !search_options_mobile_visible" />
         </div>
-        <div id="result-panel">
+        <div id="bottom-panel">
             <div id="search-options-panel" :class="{'search-options-panel-mobile': isMobile,
                 'search-options-panel-mobile-visible': isMobile && search_options_mobile_visible}">
+                <div v-show="isAuthenticated" style="display: flex; margin-bottom: 1em">
+                    <label style="display: flex; flex: 1; align-items: center">Only my specs</label>
+                    <InputSwitch v-model="showOnlyMySpec" />
+                </div>
                 <Dropdown v-model="language" :options="languages" title="Language" />
             </div>
-            <div v-show="isDesktop || (isMobile && !search_options_mobile_visible)" id="list">
-                <SearchResultItem label="lib1" />
-                <SearchResultItem label="lib2" />
-                <SearchResultItem label="lib3" />
-                <SearchResultItem label="lib4" />
-                <SearchResultItem label="lib5" />
-                <SearchResultItem label="lib..." />
-                <SearchResultItem label="libN" />
+            <div v-show="isDesktop || (isMobile && !search_options_mobile_visible)" id="result-panel">
+                <div id="list">
+                    <SearchResultItem label="lib1" />
+                    <SearchResultItem label="lib2" />
+                    <SearchResultItem label="lib3" />
+                    <SearchResultItem label="lib4" />
+                    <SearchResultItem label="lib5" />
+                    <SearchResultItem label="lib6" />
+                    <SearchResultItem label="lib7" />
+                    <SearchResultItem label="lib..." />
+                    <SearchResultItem label="libN" />
+                </div>
             </div>
         </div>
     </div>
@@ -38,7 +46,9 @@ export default {
             search_options_mobile_visible: false,
 
             language: "Select language",
-            languages: ["Select language", "C", "C++", "C#", "Java", "Python"]
+            languages: ["Select language", "C", "C++", "C#", "Java", "Python"],
+
+            showOnlyMySpec: false
         }
     },
     methods: {
@@ -49,7 +59,8 @@ export default {
     computed: {
         ...mapGetters([
             "isDesktop",
-            "isMobile"
+            "isMobile",
+            "isAuthenticated"
         ])
     }
 }
@@ -64,7 +75,7 @@ export default {
     overflow: auto;
 }
 
-#search-panel {
+#top-panel {
     display: flex;
 }
 
@@ -81,12 +92,13 @@ export default {
     margin-left: 0.5em;
 }
 
-#result-panel {
+#bottom-panel {
     position: relative;
     display: flex;
     flex: 1;
-    margin: 1em 0em;
-    padding: 0.2em 0.2em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    padding: 0.2em 0.2em; /* for shadows */
     overflow: auto;
 }
 
@@ -94,6 +106,8 @@ export default {
     display: flex;
     flex-flow: column;
     width: 12em;
+    margin-top: 0.5em;
+    margin-right: 1em;
     padding: 1em 0.5em;
     border-radius: 0.25em;
     background-color: white;
@@ -113,11 +127,17 @@ export default {
     left: 0; /* opened */
 }
 
+#result-panel {
+    display: flex;
+    flex-flow: column;
+    flex: 1;
+}
+
 #list {
     display: flex;
     flex-flow: column;
     flex: 1;
-    padding: 1em;
+    padding: 0em 0.5em;
     overflow: auto;
 }
 </style>

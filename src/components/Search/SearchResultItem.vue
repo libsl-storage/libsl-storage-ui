@@ -1,6 +1,12 @@
 <template>
     <div class="search-result-item" @click="$router.push({path: '/lib'})">
-        {{ label }}
+        <div style="margin: 0.5em 0em">
+            {{ label }}
+        </div>
+        <div>
+            <Tag class="tag" value="tag1" />
+            <Tag class="tag" value="tag2" />
+        </div>
     </div>
 </template>
 
@@ -21,8 +27,9 @@ export default {
 <style>
 .search-result-item {
     display: flex;
-    padding: 1em;
-    margin-bottom: 1.5em;
+    flex-flow: column;
+    margin: 0.5em 0em 1.5em 0em;
+    padding: 0.5em 1em;
     border-radius: 0.5em;
     background-color: white;
     box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.2);
@@ -31,5 +38,9 @@ export default {
 .search-result-item:hover {
     cursor: pointer;
     box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.3);
+}
+
+.tag {
+    margin-right: 0.5em;
 }
 </style>

@@ -10,8 +10,18 @@ const routes = [
         component: () => import('@/components/Search/Search.vue')
       },
       {
+        path: "/account",
+        component: () => import('@/components/Account.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "new-specification",
+        component: () => import('@/components/NewSpec.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: '/lib',
-        component: () => import('@/components/Search/LibPage.vue')
+        component: () => import('@/components/LibPage.vue')
       }
     ]
   },

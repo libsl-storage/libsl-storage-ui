@@ -27,10 +27,10 @@
           <InputText v-model="login" placeholder="Login" style="width: 14em" />
         </div>
         <div style="margin-bottom: 0.4em">
-          <Password v-model="password" placeholder="Password" :feedback="false" :toggleMask="true" inputStyle="width: 14em;" />
+          <Password v-model="password" placeholder="Password" :feedback="false" :toggleMask="true" :inputStyle="{'width': '14em'}" />
         </div>
         <div style="margin-bottom: 0.4em">
-          <Password v-model="repeat_password" placeholder="Repeat Password" :feedback="false" :toggleMask="true" inputStyle="width: 14em;" />
+          <Password v-model="repeat_password" placeholder="Repeat Password" :feedback="false" :toggleMask="true" :inputStyle="{'width': '14em'}" />
         </div>
       </div>
       <div style="display: flex; margin-top: 0.6em">

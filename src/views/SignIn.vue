@@ -9,7 +9,7 @@
           </div>
           <div style="margin-bottom: 0.4em">
             <Password v-model="password" name="password" type="password" autocomplete="current-password"
-              placeholder="Password" inputStyle="width: 14em" :feedback="false" :toggleMask="true" />
+              placeholder="Password" :inputStyle="{'width': '14em'}" :feedback="false" :toggleMask="true" />
           </div>
         </form>
       </div>

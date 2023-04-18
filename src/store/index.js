@@ -3,6 +3,7 @@ import { createStore } from 'vuex'
 export default createStore({
   state: {
     isDesktop: navigator.userAgent.search(/iPhone|Android/) == -1,
+    isAuthenticated: true
   },
   getters: {
     isDesktop(state) {
@@ -10,6 +11,9 @@ export default createStore({
     },
     isMobile(state) {
       return !state.isDesktop
+    },
+    isAuthenticated(state) {
+      return state.isAuthenticated
     }
   },
   mutations: {

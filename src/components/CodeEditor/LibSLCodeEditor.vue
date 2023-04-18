@@ -10,6 +10,9 @@
                         {{ slotProps.option }} pt
                     </template>
                 </Dropdown>
+                <div v-show="readonly" id="read-only-indicator">
+                    read-only
+                </div>
             </div>
             <div>
                 <Button class="p-button-secondary p-button-text" icon="pi pi-copy" title="Copy code"
@@ -40,7 +43,7 @@ export default {
         },
         readonly: {
             type: Boolean,
-            default: false
+            default: true
         }
     },
     mounted() {
@@ -82,7 +85,30 @@ export default {
     },
     methods: {
         copy_code() {
-            navigator.clipboard.writeText(this.code)
+            try { 
+                navigator.clipboard.writeText(this.code)
+            } catch (e) { // the old method for some browsers
+                let code_el = document.getElementById("code")
+                let oldContentEditable = code_el.contentEditable
+                let oldReadOnly = code_el.readOnly
+                let range = document.createRange()
+
+                code_el.contentEditable = true
+                code_el.readOnly = false
+                range.selectNodeContents(code_el)
+
+                let s = window.getSelection()
+                s.removeAllRanges()
+                s.addRange(range)
+
+                code_el.setSelectionRange(0, 999999)
+
+                code_el.contentEditable = oldContentEditable
+                code_el.readOnly = oldReadOnly
+
+                document.execCommand('copy')
+                s.removeAllRanges()
+            }
         },
         tab_handler() {
             let code_el = document.getElementById("code")
@@ -163,6 +189,14 @@ export default {
     align-items: center;
     padding: 0.25em;
     border-bottom: 1px solid black;
+}
+
+#read-only-indicator {
+    display: flex;
+    align-items: center;
+    margin-left: 1em;
+    font-size: small;
+    color: grey;
 }
 
 #main {
