@@ -1,42 +1,72 @@
 <template>
     <div id="lib-page" :class="{'lib-page-mobile': isMobile}">
         <div id="lib-info" style="flex-flow: column">
-            <div style="display: flex; justify-content: space-between">
+            <div style="display: flex">
                 <Button icon="pi pi-chevron-circle-left" title="Back" @click="$router.push({path: '/'})"/>
-                <Button icon="pi pi-download" title="Download" />
+                <div style="display: flex; align-items: center; padding-left: 0.5em; font-size: large; font-weight: bold;">
+                    LibName
+                </div>
             </div>
-            <div style="display: flex; align-items: center; margin-top: 1em; font-size: large; font-weight: bold;">
-                LibName
-            </div>
-            <div style="margin-top: 1em">
-                <Tag class="tag" value="tag1" />
-                <Tag class="tag" value="tag1" />
-            </div>
-            <div style="margin-top: 1em">
-                Description 
-            </div>
+            <Card class="card">
+                <template #title>Visibility</template>
+                <template #content>
+                    <div style="display: flex; flex-flow: column">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5em">
+                            <Checkbox v-model="show_code" :binary="true" />
+                            <div style="cursor: pointer; margin-left: 0.5em" @click="show_code=!show_code">
+                                Code
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center">
+                            <Checkbox v-model="show_graph" :binary="true" />
+                            <div style="cursor: pointer; margin-left: 0.5em" @click="show_graph=!show_graph">
+                                Graph
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </Card>
+            <Card class="card">
+                <template #title>Tags</template>
+                <template #content>
+                    <div style="margin-top: 1em">
+                        <Tag class="tag" value="tag1" />
+                        <Tag class="tag" value="tag1" />
+                    </div>
+                </template>
+            </Card>
+            <Card class="card">
+                <template #title>Description</template>
+                <template #content>
+                    description
+                </template>
+            </Card>
         </div>
-        <div style="display: flex; flex: 1; min-height: 20em;">
-            <LibSLCodeEditor :content="code" style="margin: 0.5em" />
+        <div v-show="show_code" style="display: flex; flex: 1; min-height: 20em;">
+            <LibSLCodeEditor :content="code" style="margin: 0.5em 1em" />
         </div>
-        <Graph :model="model" style="margin: 0.5em"/>
+        <Graph v-show="show_graph" :model="graph_model" style="margin: 0.5em 1em"/>
     </div>
 </template>
 
 <script>
+import Card from 'primevue/card'
 import LibSLCodeEditor from '@/components/CodeEditor/LibSLCodeEditor.vue'
 import Graph from '@/components/StateGraph.vue'
 import { mapGetters } from 'vuex';
 export default {
     name: "v-lib-page",
     components: {
+        Card,
         LibSLCodeEditor,
         Graph
     },
     data() {
         return {
-            code: "LibSL\n\t\tcode\n1\n1\n1\n1\n1\n1\n1\n1\n1\n1\n1\n1\n1",
-            model: {
+            show_code: true,
+            show_graph: true,
+            code: "LibSL\n\t\tcode",
+            graph_model: {
                 "class": "GraphLinksModel",
                 "nodeDataArray": [
                     {"key": 1, "text": "Alpha", "color": "lightblue"},
@@ -57,6 +87,16 @@ export default {
         ...mapGetters([
             "isMobile"
         ])
+    },
+    watch: {
+        show_code() {
+            if (!this.show_code && !this.show_graph)
+                this.show_graph = true
+        },
+        show_graph() {
+            if (!this.show_graph && !this.show_code)
+                this.show_code = true
+        }
     }
 }
 </script>
@@ -74,12 +114,12 @@ export default {
 }
 
 #lib-info {
-    min-width: 12em;
+    min-width: 15em;
     margin: 0.5em;
-    padding: 1em 0.5em;
-    border-radius: 0.25em;
-    background-color: white;
-    box-shadow: 0px 0px 4px 1px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    margin: 1em 0em;
 }
 
 .tag {

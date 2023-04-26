@@ -9,7 +9,7 @@
         <div id="bottom-panel">
             <div id="search-options-panel" :class="{'search-options-panel-mobile': isMobile,
                 'search-options-panel-mobile-visible': isMobile && search_options_mobile_visible}">
-                <div v-show="isAuthenticated" style="display: flex; margin-bottom: 1em">
+                <div v-show="isAuthenticated" style="display: flex; padding: 0em 0.2em; margin-bottom: 1em">
                     <label style="display: flex; flex: 1; align-items: center">Only my specs</label>
                     <InputSwitch v-model="showOnlyMySpec" />
                 </div>

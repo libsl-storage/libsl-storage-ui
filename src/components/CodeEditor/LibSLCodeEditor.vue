@@ -179,8 +179,6 @@ export default {
     flex: 1;
     overflow: hidden;
     border: 1px solid black;
-    border-top-left-radius: 0.5em;
-    border-top-right-radius: 0.5em;
     background-color: white;
 }
 

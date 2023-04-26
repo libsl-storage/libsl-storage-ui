@@ -10,7 +10,7 @@
             <div style="display: flex; justify-content: right; margin-bottom: 0.5em">
                 <Button label="Browse" icon="pi pi-file" @click="openFileChooser" />
             </div>
-            <LibSLCodeEditor />
+            <LibSLCodeEditor :readonly="false"/>
         </div>
         <div style="display: flex; justify-content: right;">
             <Button label="Cancel" icon="pi pi-times" severity="secondary" style="margin-right: 1em"
