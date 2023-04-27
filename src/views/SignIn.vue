@@ -13,15 +13,26 @@
           </div>
         </form>
       </div>
-      <div style="display: flex; margin-top: 0.6em">
-        <div style="display: flex; flex: 1">
-          <Button label="Create account" class="p-button-link" style="padding: 0.1em"
-            @click="sign_up"/>
+      <div style="display: flex; flex: 1; justify-content: center; margin-top: 0.5em">
+        <Button label="Sign in" class="p-button-raised" style="width: 100%"
+          :disabled="login == '' || password == ''" @click="sign_in" />
+      </div>
+      <div style="display: flex; margin-top: 1em">
+        <div style="display: flex; flex: 1; align-items: center;">
+          <div style="flex: 1; border-top: 1px solid lightgrey" />
         </div>
-        <div>
-          <Button label="Sign in" class="p-button-raised"
-            :disabled="login == '' || password == ''" @click="sign_in" />
+        <div style="margin: 0em 0.5em">or</div>
+        <div style="display: flex; flex: 1; align-items: center;">
+          <div style="flex: 1; border-top: 1px solid lightgrey" />
         </div>
+      </div>
+      <div style="display: flex; justify-content: space-around; margin-top: 0.5em">
+        <Button icon="pi sign-in-with-google-icon" label="Google" text />
+        <Button icon="pi sign-in-with-github-icon" label="GitHub" text />
+      </div>
+      <div style="display: flex; flex: 1; justify-content: center; margin-top: 0.6em">
+        <Button label="Create account" class="p-button-link" style="padding: 0.1em"
+          @click="sign_up"/>
       </div>
     </div>
   </div>
@@ -76,9 +87,21 @@ export default {
 }
 
 #sign_in_panel {
-  padding: 2em 1.5em;
+  padding: 1.5em;
 	background-color: white;
 	box-shadow: 1px 1px 4px #808080;
   border-radius: 10px;
+}
+
+.sign-in-with-google-icon {
+  background: url("@/assets/sign_in_with_google.svg");
+  height: 18px;
+  width: 18px;
+}
+
+.sign-in-with-github-icon {
+  background: url("@/assets/sign_in_with_github.svg");
+  height: 18px;
+  width: 18px;
 }
 </style>

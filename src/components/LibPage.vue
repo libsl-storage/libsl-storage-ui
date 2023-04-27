@@ -14,13 +14,13 @@
                         <div style="display: flex; align-items: center; margin-bottom: 0.5em">
                             <Checkbox v-model="show_code" :binary="true" />
                             <div style="cursor: pointer; margin-left: 0.5em" @click="show_code=!show_code">
-                                Code
+                                Code section
                             </div>
                         </div>
                         <div style="display: flex; align-items: center">
                             <Checkbox v-model="show_graph" :binary="true" />
                             <div style="cursor: pointer; margin-left: 0.5em" @click="show_graph=!show_graph">
-                                Graph
+                                Graph section
                             </div>
                         </div>
                     </div>
@@ -43,16 +43,16 @@
             </Card>
         </div>
         <div v-show="show_code" style="display: flex; flex: 1; min-height: 20em;">
-            <LibSLCodeEditor :content="code" style="margin: 0.5em 1em" />
+            <LibSLCodeEditor :content="code" style="margin: 0.5em" />
         </div>
-        <Graph v-show="show_graph" :model="graph_model" style="margin: 0.5em 1em"/>
+        <Graph v-show="show_graph" :model="graph_model" style="margin: 0.5em"/>
     </div>
 </template>
 
 <script>
 import Card from 'primevue/card'
 import LibSLCodeEditor from '@/components/CodeEditor/LibSLCodeEditor.vue'
-import Graph from '@/components/StateGraph.vue'
+import Graph from '@/components/Graph.vue'
 import { mapGetters } from 'vuex';
 export default {
     name: "v-lib-page",
@@ -67,18 +67,33 @@ export default {
             show_graph: true,
             code: "LibSL\n\t\tcode",
             graph_model: {
-                "class": "GraphLinksModel",
-                "nodeDataArray": [
-                    {"key": 1, "text": "Alpha", "color": "lightblue"},
-                    {"key": 2, "text": "Beta", "color": "orange"},
-                    {"key": 3, "text": "Gamma", "color": "lightgreen"},
-                    {"key": 4, "text": "Delta", "color": "yellow"}
+                nodes: [
+                    {
+                        data: {
+                            id: 0,
+                            name: "0"
+                        }
+                    },
+                    {
+                        data: {
+                            id: 1,
+                            name: "1"
+                        }
+                    },
                 ],
-                "linkDataArray": [
-                    {"from": 1, "to": 2},
-                    {"from": 1, "to": 3},
-                    {"from": 3, "to": 4},
-                    {"from": 2, "to": 4}
+               edges: [
+                    {
+                        data: {
+                            source: 0,
+                            target: 1
+                        }
+                    },
+                    {
+                        data: {
+                            source: 1,
+                            target: 0
+                        }
+                    },
                 ]
             }
         }

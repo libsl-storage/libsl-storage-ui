@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
-    "gojs": "^2.3.5",
+    "cytoscape": "^3.24.0",
     "primeicons": "^6.0.1",
     "primevue": "^3.24.0",
     "vue": "^3.2.13",

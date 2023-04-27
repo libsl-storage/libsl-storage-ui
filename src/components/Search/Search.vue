@@ -10,7 +10,7 @@
             <div id="search-options-panel" :class="{'search-options-panel-mobile': isMobile,
                 'search-options-panel-mobile-visible': isMobile && search_options_mobile_visible}">
                 <div v-show="isAuthenticated" style="display: flex; padding: 0em 0.2em; margin-bottom: 1em">
-                    <label style="display: flex; flex: 1; align-items: center">Only my specs</label>
+                    <label style="display: flex; flex: 1; align-items: center">Show only my specs</label>
                     <InputSwitch v-model="showOnlyMySpec" />
                 </div>
                 <Dropdown v-model="language" :options="languages" title="Language" />
@@ -105,7 +105,7 @@ export default {
 #search-options-panel {
     display: flex;
     flex-flow: column;
-    width: 12em;
+    width: 15em;
     margin-top: 0.5em;
     margin-right: 1em;
     padding: 1em 0.5em;

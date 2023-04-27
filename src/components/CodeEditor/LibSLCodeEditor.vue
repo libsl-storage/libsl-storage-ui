@@ -10,9 +10,6 @@
                         {{ slotProps.option }} pt
                     </template>
                 </Dropdown>
-                <div v-show="readonly" id="read-only-indicator">
-                    read-only
-                </div>
             </div>
             <div>
                 <Button class="p-button-secondary p-button-text" icon="pi pi-copy" title="Copy code"
@@ -187,14 +184,6 @@ export default {
     align-items: center;
     padding: 0.25em;
     border-bottom: 1px solid black;
-}
-
-#read-only-indicator {
-    display: flex;
-    align-items: center;
-    margin-left: 1em;
-    font-size: small;
-    color: grey;
 }
 
 #main {
