@@ -53,7 +53,7 @@
 import Card from 'primevue/card'
 import LibSLCodeEditor from '@/components/CodeEditor/LibSLCodeEditor.vue'
 import Graph from '@/components/Graph.vue'
-import { mapGetters } from 'vuex';
+import { mapGetters } from 'vuex'
 export default {
     name: "v-lib-page",
     components: {

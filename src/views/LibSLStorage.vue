@@ -20,15 +20,15 @@
         </div>
     </div>
 
-    <Dialog :visible="signOutConfirmDialogVisible" @keydown.esc="signOutConfirmDialogVisible = false"
+    <PopUp :visible="signOutPopUpVisible" @keydown.esc="signOutPopUpVisible = false"
 		:modal="true" :closable="false" :draggable="false">
 		Are you sure you want to sign out?
 		<template #footer>
 			<Button label="No" icon="pi pi-times" class="p-button-text"
-				@click="signOutConfirmDialogVisible = false" />
+				@click="signOutPopUpVisible = false" />
 			<Button label="Yes" icon="pi pi-check" autofocus />
 		</template>
-	</Dialog>
+	</PopUp>
 </template>
 
 <script>
@@ -63,11 +63,11 @@ export default {
                     icon: "pi pi-sign-out",
                     label: "Sign Out",
                     command: () => {
-                        this.signOutConfirmDialogVisible = true
+                        this.signOutPopUpVisible = true
                     }
                 }
             ],
-            signOutConfirmDialogVisible: false
+            signOutPopUpVisible: false
         }
     },
     methods: {

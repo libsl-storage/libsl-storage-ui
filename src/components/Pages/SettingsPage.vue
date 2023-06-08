@@ -1,57 +1,42 @@
 <template>
     <div id="account">
       <div v-show="userDataIsReady" id="settings_content">
-          <div style="padding-bottom: 1em">
-          <div style="display: flex; justify-content: center; padding-bottom: 0.5em">
-              <img v-if="photo==null" id="photo" src="@/assets/blank_user_photo.jpg">
-              <img v-else id="photo" :src="photo" />
-          </div>
-          <div style="display: flex; justify-content: center; align-items: center">
-              <input id="selectPhoto" accept="image/png,image/jpeg" type="file" @change="onFileChange"
-              style="display: none" />
-              <Button label="Browse" icon="pi pi-camera" class="p-button-raised p-button-rounded"
-              @click="openFileChooser" />
-              <Button icon="pi pi-trash" :disabled="photo==null" style="margin-left: 0.5em"
-              class="p-button-raised p-button-rounded p-button-danger"
-              @click="resetPhoto" />
-          </div>
-          </div>
           <div class="setting">
             <div style="margin-right: 0.2em">
-                Nickname:
+                Username:
             </div>
-            <div style="width: 8em; text-align: center; border-bottom: 1px solid" :title="nickname">
+            <div style="width: 8em; text-align: center; border-bottom: 1px solid" :title="username">
                 <p style="overflow: hidden; text-overflow: ellipsis; margin: 0em">
-                {{nickname}}
-                <Skeleton v-show="!nickname" style="padding: 0.6em 0px" />
+                {{username}}
+                <Skeleton v-show="!username" style="padding: 0.6em 0px" />
                 </p>
             </div>
-            <Button class="p-button-text" icon="pi pi-pencil" title="Change nickname"
-                @click="showChangeNicknameDialog" />
+            <Button class="p-button-text" icon="pi pi-pencil" title="Change username"
+                @click="showChangeUsernamePopUp" />
           </div>
           <div class="setting">
             <Button class="p-button-link" label="Change password" style="padding: 0em"
-                @click="showChangePasswordDialog" />
+                @click="showChangePasswordPopUp" />
           </div>
           <div class="setting">
             <Button class="p-button-text p-button-danger" label="Delete account"
                 style="padding: 0em"
-                @click="showDeleteAccountDialog" />
+                @click="showDeleteAccountPopUp" />
           </div>
       </div>
     </div>
   
-    <Dialog v-model:visible="changeNicknameDialogVisible"
-      header="Change nickname" :modal="true" :draggable="false">
-      <InputText v-model="new_nickname" placeholder="New nickname" autofocus
-         @keydown.enter="change_nickname" />
+    <PopUp v-model:visible="changeUsernamePopUpVisible"
+      header="Change username" :modal="true" :draggable="false">
+      <InputText v-model="new_username" placeholder="New username" autofocus
+         @keydown.enter="change_username" />
           <template #footer>
-              <Button label="Apply" :disabled="new_nickname.length == 0"
-                  @click="change_nickname" />
+              <Button label="Apply" :disabled="new_username.length == 0"
+                  @click="change_username" />
           </template>
-      </Dialog>
+    </PopUp>
   
-    <Dialog v-model:visible="changePasswordDialogVisible"
+    <PopUp v-model:visible="changePasswordPopUpVisible"
           header="Change password" :modal="true" :draggable="false">
       <div style="display: flex; flex-flow: column" @keydown.enter="change_password">
         <Password v-model="current_password" style="margin-bottom: 0.5em"
@@ -64,9 +49,9 @@
       <template #footer>
               <Button label="Apply" :disabled="!isDataValid" @click="change_password" />
           </template>
-      </Dialog>
+    </PopUp>
   
-    <Dialog v-model:visible="deleteAccountDialogVisible"
+    <PopUp v-model:visible="deleteAccountPopUpVisible"
           header="Delete account" :modal="true" :draggable="false">
       <div style="display: flex; flex-flow: column">
         <div style="display: flex; justify-content: center">
@@ -84,14 +69,14 @@
               <Button label="Delete" class="p-button-danger" :disabled="!agree"
                   @click="delete_account" />
           </template>
-      </Dialog>
+    </PopUp>
   </template>
   
   <script>
   import { mapActions, mapGetters } from "vuex"
   import Skeleton from 'primevue/skeleton'
   export default {
-    name: "v-acount",
+    name: "v-settings",
     components: {
       Skeleton
     },
@@ -101,15 +86,15 @@
       return {
         userDataIsReady: true, //false,
         photo: null,
-        nickname: "test", //
-        changeNicknameDialogVisible: false,
-        new_nickname: "",
+        username: "test", //
+        changeUsernamePopUpVisible: false,
+        new_username: "",
         showOnlineStatus: true,
-        changePasswordDialogVisible: false,
+        changePasswordPopUpVisible: false,
         current_password: "",
         new_password: "",
         repeat_new_password: "",
-        deleteAccountDialogVisible: false,
+        deleteAccountPopUpVisible: false,
         agree: false
       }
     },
@@ -118,7 +103,7 @@
         let user_info_response = await this.makeRequest("/get_user_info")
         if (user_info_response && user_info_response.status == 200) {
           let data = await user_info_response.json()
-          this.nickname = data["nickname"]
+          this.username = data["username"]
           this.showOnlineStatus = data["status"] == true
   
           let photo_response = await this.makeRequest("/get_user_photo")
@@ -149,25 +134,25 @@
           document.getElementById("selectPhoto").value = ""
         }
       },
-      async change_nickname() {
-        if (this.new_nickname.length < 4) {
+      async change_username() {
+        if (this.new_username.length < 4) {
           this.$toast.add({
             severity: "error",
-            summary: "Short nickname",
-            detail: "The nickname must consist at least of 4 characters",
+            summary: "Short username",
+            detail: "The username must consist at least of 4 characters",
             life: 5000
           })
           return
         }
         let response = await this.makeRequest(
-          "/update_nickname",
-          {"new_nickname": this.new_nickname},
+          "/update_username",
+          {"new_username": this.new_username},
           "PATCH"
         )
         if (response.status == 201) {
-          this.nickname = this.new_nickname
+          this.username = this.new_username
         }
-        this.changeNicknameDialogVisible = false
+        this.changeUsernamePopUpVisible = false
       },
       async change_password() {
         if (this.checkPasswordSecurity()) {
@@ -180,7 +165,7 @@
             this.$toast.add({severity: "info", summary: "Password updated", life: 5000})
           else
             this.$toast.add({severity: "error", summary: await response.text(), life: 5000})
-          this.changePasswordDialogVisible = false
+          this.changePasswordPopUpVisible = false
         }
       },
       async delete_account() {
@@ -197,22 +182,22 @@
         else {
           this.$toast.add({severity: "error", summary: await response.text(), life: 5000})
         }
-        this.deleteAccountDialogVisible = false
+        this.deleteAccountPopUpVisible = false
       },
-      showChangeNicknameDialog() {
-        this.new_nickname = this.nickname
-        this.changeNicknameDialogVisible = true
+      showChangeUsernamePopUp() {
+        this.new_username = this.username
+        this.changeUsernamePopUpVisible = true
       },
-      showChangePasswordDialog() {
+      showChangePasswordPopUp() {
         this.current_password = ""
         this.new_password = ""
         this.repeat_new_password = ""
-        this.changePasswordDialogVisible = true
+        this.changePasswordPopUpVisible = true
       },
-      showDeleteAccountDialog() {
+      showDeleteAccountPopUp() {
         this.current_password = ""
         this.agree = false
-        this.deleteAccountDialogVisible= true
+        this.deleteAccountPopUpVisible= true
       },
       checkPasswordSecurity() {
         let success = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/.test(this.new_password)

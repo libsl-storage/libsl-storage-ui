@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import SearchResultItem from "@/components/Search/SearchResultItem.vue"
+import SearchResultItem from "@/components/SearchResultItem.vue"
 import { mapGetters } from "vuex"
 export default {
     name: "v-search",

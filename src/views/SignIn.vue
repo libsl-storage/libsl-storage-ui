@@ -3,19 +3,25 @@
     <div id="sign_in_panel">
       <div style="display: flex; flex-flow: column" @keydown.enter="sign_in">
         <form>
-          <div style="margin-bottom: 0.4em">
-            <InputText v-model="login" name="email" type="email" autocomplete="username"
-              placeholder="Login" style="width: 14em" autofocus />
+          <div style="margin-top: 1.5em">
+            <span class="p-float-label">
+              <InputText v-model="email" id="username" name="email" type="email" autocomplete="username"
+                style="width: 14em" autofocus />
+              <label for="username">Email</label>
+            </span>
           </div>
-          <div style="margin-bottom: 0.4em">
-            <Password v-model="password" name="password" type="password" autocomplete="current-password"
-              placeholder="Password" :inputStyle="{'width': '14em'}" :feedback="false" :toggleMask="true" />
+          <div style="margin-top: 1.5em">
+            <span class="p-float-label">
+              <Password v-model="password" id="password" name="password" type="password" autocomplete="current-password"
+                :inputStyle="{'width': '14em'}" :toggleMask="true" :feedback="false" />
+              <label for="password">Password</label>
+            </span>
           </div>
         </form>
       </div>
-      <div style="display: flex; flex: 1; justify-content: center; margin-top: 0.5em">
+      <div style="display: flex; flex: 1; justify-content: center; margin-top: 1em">
         <Button label="Sign in" class="p-button-raised" style="width: 100%"
-          :disabled="login == '' || password == ''" @click="sign_in" />
+          :disabled="email == '' || password == ''" @click="sign_in" />
       </div>
       <div style="display: flex; margin-top: 1em">
         <div style="display: flex; flex: 1; align-items: center;">
@@ -44,24 +50,22 @@ export default {
 	name: "v-sign-in",
   data() {
     return {
-      login: "",
+      email: "",
       password: ""
     }
   },
   methods: {
     async sign_in() {
-      let formData = new FormData()
-      formData.set("login", this.login)
-      formData.set("password", this.password)
-      let r = await fetch("/authentication", {
-        method: "POST", body: formData
+      let r = await this.httpRequest("https://b8f5-31-134-188-21.ngrok-free.app/login", "POST", {
+        "email": this.email,
+        "password": this.password
       })
       if (r.status == 200) {
+        console.log(await r.json())
         sessionStorage.setItem("authenticated", true)
         this.$router.replace({"path": "/dashboard/messenger"})
-      } else if (r.status == 401) {
-        this.$toast.add({severity: "error", summary: "Authentication failed",
-          detail: "Invalid username or password", life: 5000})
+      } else {
+        this.$toast.add({severity: "error", summary: "Authentication failed", life: 5000})
         this.login = ""
         this.password = ""
       }
@@ -70,7 +74,6 @@ export default {
       this.$router.push({ path: "/sign-up" })
     },
     ...mapActions([
-      "tokenHandler"
     ])
   }
 }

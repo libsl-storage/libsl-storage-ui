@@ -7,21 +7,21 @@ const routes = [
     children: [
       {
         path: "/",
-        component: () => import('@/components/Search/Search.vue')
+        component: () => import('@/components/Pages/SearchPage.vue')
       },
       {
-        path: "/account",
-        component: () => import('@/components/Account.vue'),
+        path: "/settings",
+        component: () => import('@/components/Pages/SettingsPage.vue'),
         meta: { requiresAuth: true }
       },
       {
         path: "new-specification",
-        component: () => import('@/components/NewSpec.vue'),
+        component: () => import('@/components/Pages/NewSpecPage.vue'),
         meta: { requiresAuth: true }
       },
       {
         path: '/lib',
-        component: () => import('@/components/LibPage.vue')
+        component: () => import('@/components/Pages/LibPage.vue')
       }
     ]
   },
@@ -40,4 +40,19 @@ const router = createRouter({
   routes
 })
 
+/*
+router.beforeEach((to, from, next) => {
+  if (sessionStorage.getItem("authenticated") == "true") { // authenticated
+    if (!to.meta.requiresAuth)
+      next({path: "/"})
+    else
+      next()
+  } else { // not authenticated
+    if (to.meta.requiresAuth)
+      next({path: "/"})
+    else
+      next()
+  }
+})
+*/
 export default router

@@ -4,6 +4,12 @@
             <InputText v-model="libName" placeholder="Lib name" style="width: 100%" autofocus />
         </div>
         <div class="property">
+            <div style="flex: 1; margin-right: 1em">
+                <InputText v-model="path" placeholder="Path" style="width: 100%" />
+            </div>
+            <Button icon="pi pi-folder-open" @click="dirChooserVisible = true" />
+        </div>
+        <div class="property">
             <InputText v-model="description" placeholder="Description" style="width: 100%" />
         </div>
         <div class="property">
@@ -18,40 +24,52 @@
         </div>
         <div style="display: flex; justify-content: right;">
             <Button label="Cancel" icon="pi pi-times" severity="secondary" style="margin-right: 1em"
-                @click="cancelDialogVisible = true" />
+                @click="cancelPopUpVisible = true" />
             <Button label="Save" icon="pi pi-save" />
         </div>
     </div>
 
-    <Dialog v-model:visible="cancelDialogVisible" header="New spec" :modal="true" :draggable="false">
+    <PopUp v-model:visible="dirChooserVisible" header="Choose folder" :modal="true" :draggable="false">
+        <DirChooser @setDir="setPath"/>
+    </PopUp>
+
+    <PopUp v-model:visible="cancelPopUpVisible" header="New spec" :modal="true" :draggable="false">
         <div>
             Your changes will be lost. Are you sure you want to continue?
         </div>
         <template #footer>
-            <Button label="No" @click="cancelDialogVisible = false" />
+            <Button label="No" @click="cancelPopUpVisible = false" />
             <Button label="Yes"/>
          </template>
-      </Dialog>
+    </PopUp>
 </template>
 
 <script>
+import DirChooser from '@/components/DirChooser/DirChooser.vue'
 import LibSLCodeEditor from '@/components/CodeEditor/LibSLCodeEditor.vue'
 export default {
     name: "v-new-spec",
     components: {
+        DirChooser,
         LibSLCodeEditor
     },
     data() {
         return {
             libName: "",
+            path: "",
             tags: "",
             description: "",
+            dirChooserVisible: false,
             codeEditorComponentKey: 0,
             code: "",
-            cancelDialogVisible: false
+            cancelPopUpVisible: false
         } 
     },
     methods: {
+        setPath(path) {
+            this.path = path
+            this.dirChooserVisible = false
+        },
         openFileChooser() {
             document.getElementById("selectFile").click()
         },
@@ -79,6 +97,7 @@ export default {
 }
 
 .property {
+    display: flex;
     margin-bottom: 1em;
 }
 </style>

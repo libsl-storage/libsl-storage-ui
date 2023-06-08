@@ -38,4 +38,8 @@ html, body {
 	height: 100%;
 	overflow: hidden;
 }
+
+.p-dialog-content { /* for PrimeVue component 'Dialog' */
+    display: flex;
+}
 </style>
