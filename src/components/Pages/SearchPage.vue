@@ -13,7 +13,13 @@
                     <label style="display: flex; flex: 1; align-items: center">Show only my specs</label>
                     <InputSwitch v-model="showOnlyMySpec" />
                 </div>
-                <Dropdown v-model="language" :options="languages" title="Language" />
+                <MultiSelect v-model="selected_filters" :options="filters" placeholder="Select filters" display="chip" />
+                <div v-show="selected_filters.includes('Name')" class="filter-item">
+                    <InputText v-model="name" placeholder="Name" />
+                </div>
+                <div v-show="selected_filters.includes('Version')" class="filter-item">
+                    <InputText v-model="version" placeholder="Version" />
+                </div>
             </div>
             <div v-show="isDesktop || (isMobile && !search_options_mobile_visible)" id="result-panel">
                 <div id="list">
@@ -45,8 +51,10 @@ export default {
             search_query: "",
             search_options_mobile_visible: false,
 
-            language: "Select language",
-            languages: ["Select language", "C", "C++", "C#", "Java", "Python"],
+            selected_filters: [],
+            filters: ["Name", "Version", "Language", "URL", "Tag1"],
+            name: "",
+            version: "",
 
             showOnlyMySpec: false
         }
@@ -131,6 +139,12 @@ export default {
     display: flex;
     flex-flow: column;
     flex: 1;
+}
+
+.filter-item {
+    display: flex;
+    justify-content: center;
+    margin-top: 1em
 }
 
 #list {

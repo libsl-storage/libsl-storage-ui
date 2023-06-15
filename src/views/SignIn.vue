@@ -56,14 +56,13 @@ export default {
   },
   methods: {
     async sign_in() {
-      let r = await this.httpRequest("https://b8f5-31-134-188-21.ngrok-free.app/login", "POST", {
+      let r = await this.httpRequest("/auth/login", "POST", {
         "email": this.email,
         "password": this.password
       })
       if (r.status == 200) {
-        console.log(await r.json())
-        sessionStorage.setItem("authenticated", true)
-        this.$router.replace({"path": "/dashboard/messenger"})
+        this.$router.replace({"path": "/"})
+        this.setAuth(true)
       } else {
         this.$toast.add({severity: "error", summary: "Authentication failed", life: 5000})
         this.login = ""
@@ -74,6 +73,7 @@ export default {
       this.$router.push({ path: "/sign-up" })
     },
     ...mapActions([
+      "setAuth"
     ])
   }
 }

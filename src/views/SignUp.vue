@@ -63,21 +63,21 @@ export default {
       this.$router.push({path: "/sign-in"})
     },
     async sign_up() {
-      let r = await this.httpRequest("https://b8f5-31-134-188-21.ngrok-free.app/register", "POST", {
+      let r = await this.httpRequest("/account/register", "POST", {
         "name": this.username,
         "email": this.email,
         "password": this.password
       })
 
-      if (r.status == 200) {
-          sessionStorage.setItem("authenticated", true)
-          this.$router.replace({"path": "/dashboard/messenger"})
+      if (r.status == 201) {
+        this.$router.replace({"path": "/"})
+        this.setAuth(true)
       } else {
         this.$toast.add({severity: "error", summary: "Registration failed", life: 5000})
       }
     },
     ...mapActions([
-      
+      "setAuth"
     ])
   },
   computed: {

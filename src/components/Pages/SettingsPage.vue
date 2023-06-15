@@ -1,6 +1,6 @@
 <template>
     <div id="account">
-      <div v-show="userDataIsReady" id="settings_content">
+      <div id="settings_content">
           <div class="setting">
             <div style="margin-right: 0.2em">
                 Username:
@@ -13,6 +13,17 @@
             </div>
             <Button class="p-button-text" icon="pi pi-pencil" title="Change username"
                 @click="showChangeUsernamePopUp" />
+          </div>
+          <div class="setting">
+            <div style="margin-right: 0.2em">
+                Email:
+            </div>
+            <div style="flex: 1; text-align: center; border-bottom: 1px solid" :title="email">
+                <p style="overflow: hidden; text-overflow: ellipsis; margin: 0em">
+                {{email}}
+                <Skeleton v-show="!email" style="padding: 0.6em 0px" />
+                </p>
+            </div>
           </div>
           <div class="setting">
             <Button class="p-button-link" label="Change password" style="padding: 0em"
@@ -80,16 +91,15 @@
     components: {
       Skeleton
     },
-    created() {
+    mounted() {
+      this.loadUserData()
     },
     data() {
       return {
-        userDataIsReady: true, //false,
-        photo: null,
-        username: "test", //
+        username: "",
+        email: "",
         changeUsernamePopUpVisible: false,
         new_username: "",
-        showOnlineStatus: true,
         changePasswordPopUpVisible: false,
         current_password: "",
         new_password: "",
@@ -100,38 +110,11 @@
     },
     methods: {
       async loadUserData() {
-        let user_info_response = await this.makeRequest("/get_user_info")
-        if (user_info_response && user_info_response.status == 200) {
+        let user_info_response = await this.httpRequest("/account", "GET")
+        if (user_info_response.status == 200) {
           let data = await user_info_response.json()
-          this.username = data["username"]
-          this.showOnlineStatus = data["status"] == true
-  
-          let photo_response = await this.makeRequest("/get_user_photo")
-          if (photo_response.status == 200)
-            this.photo = URL.createObjectURL(new Blob([await photo_response.arrayBuffer()], {type: 'image/jpeg'}))
-        }
-      },
-      openFileChooser() {
-        document.getElementById("selectPhoto").click();
-      },
-      async onFileChange(e) {
-        let files = e.target.files || e.dataTransfer.files
-        let response = await this.makeRequest(
-          "/update_photo",
-          {"photo": files[0]},
-          "PATCH"
-        )
-        if (response && response.status == 201) {
-          this.photo = URL.createObjectURL(files[0])
-        } else {
-          this.$toast.add({severity: "error", summary: await response.text(), life: 5000})
-        }
-      },
-      async resetPhoto() {
-        let response = await this.makeRequest("/delete_photo", {}, "DELETE")
-        if (response && response.status == 200) {
-          this.photo = null
-          document.getElementById("selectPhoto").value = ""
+          this.username = data["name"]
+          this.email = data["email"]
         }
       },
       async change_username() {
@@ -144,29 +127,36 @@
           })
           return
         }
-        let response = await this.makeRequest(
-          "/update_username",
-          {"new_username": this.new_username},
-          "PATCH"
-        )
-        if (response.status == 201) {
+        let response = await this.httpRequest("/account", "POST", {
+          "name": this.new_username
+        })
+        if (response.status == 200) {
           this.username = this.new_username
         }
         this.changeUsernamePopUpVisible = false
       },
       async change_password() {
         if (this.checkPasswordSecurity()) {
-          let response = await this.makeRequest(
-            "/update_password",
-            {"current_password": this.current_password, "new_password": this.new_password},
-            "PATCH"
-          )
-          if (response.status == 201)
+          let response = await this.httpRequest("/account/updatePassword", "POST", {
+          "oldPassword": this.current_password,
+          "newPassword": this.new_password
+        })
+          if (response.status == 200) {
             this.$toast.add({severity: "info", summary: "Password updated", life: 5000})
-          else
-            this.$toast.add({severity: "error", summary: await response.text(), life: 5000})
+          } else if (response.status == 403) {
+            this.$toast.add({severity: "error", summary: "Invalid current password", life: 5000})
+          }
           this.changePasswordPopUpVisible = false
         }
+      },
+      checkPasswordSecurity() {
+        let success = this.new_password.length == 0 || this.new_password.length >= 8
+        if (!success) {
+          this.$toast.add({severity: "error", summary: "Weak password",
+            detail: "The password must consist of at least 8 characters",
+            life: 10000})
+        }
+        return success
       },
       async delete_account() {
         let response = await this.makeRequest(
@@ -199,15 +189,6 @@
         this.agree = false
         this.deleteAccountPopUpVisible= true
       },
-      checkPasswordSecurity() {
-        let success = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/.test(this.new_password)
-        if (!success) {
-          this.$toast.add({severity: "error", summary: "Weak password",
-            detail: "The password must consist of at least 8 characters, at least one lowercase, one uppercase and one digit",
-            life: 10000})
-        }
-        return success
-      },
       ...mapActions([
   
       ])
@@ -220,15 +201,6 @@
       ...mapGetters([
         "isMobile"
       ])
-    },
-    watch: {
-      showOnlineStatus() {
-        this.makeRequest(
-          "/update_show_online_status",
-          {"new_status": this.showOnlineStatus},
-          "PATCH"
-        )
-      }
     }
   }
   </script>

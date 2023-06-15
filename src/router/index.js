@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import store from '@/store'
 
 const routes = [
   {
@@ -27,11 +28,17 @@ const routes = [
   },
   {
     path: "/sign-in",
-    component: () => import('@/views/SignIn.vue')
+    component: () => import('@/views/SignIn.vue'),
+    meta: { requiresUnauth: true }
   },
   {
     path: "/sign-up",
-    component: () => import('@/views/SignUp.vue')
+    component: () => import('@/views/SignUp.vue'),
+    meta: { requiresUnauth: true }
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/"
   }
 ]
 
@@ -40,10 +47,9 @@ const router = createRouter({
   routes
 })
 
-/*
 router.beforeEach((to, from, next) => {
-  if (sessionStorage.getItem("authenticated") == "true") { // authenticated
-    if (!to.meta.requiresAuth)
+  if (store.getters.isAuthenticated) {
+    if (to.meta.requiresUnauth)
       next({path: "/"})
     else
       next()
@@ -54,5 +60,5 @@ router.beforeEach((to, from, next) => {
       next()
   }
 })
-*/
+
 export default router

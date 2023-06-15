@@ -24,24 +24,14 @@
         </div>
         <div style="display: flex; justify-content: right;">
             <Button label="Cancel" icon="pi pi-times" severity="secondary" style="margin-right: 1em"
-                @click="cancelPopUpVisible = true" />
+                @click="$emit('cancel')" />
             <Button label="Save" icon="pi pi-save" />
         </div>
+
+        <PopUp v-model:visible="dirChooserVisible" header="Choose folder" :modal="true" :draggable="false">
+            <DirChooser @setPath="setPath"/>
+        </PopUp>
     </div>
-
-    <PopUp v-model:visible="dirChooserVisible" header="Choose folder" :modal="true" :draggable="false">
-        <DirChooser @setDir="setPath"/>
-    </PopUp>
-
-    <PopUp v-model:visible="cancelPopUpVisible" header="New spec" :modal="true" :draggable="false">
-        <div>
-            Your changes will be lost. Are you sure you want to continue?
-        </div>
-        <template #footer>
-            <Button label="No" @click="cancelPopUpVisible = false" />
-            <Button label="Yes"/>
-         </template>
-    </PopUp>
 </template>
 
 <script>
@@ -53,6 +43,9 @@ export default {
         DirChooser,
         LibSLCodeEditor
     },
+    emits: [
+        "cancel"
+    ],
     data() {
         return {
             libName: "",
@@ -61,8 +54,7 @@ export default {
             description: "",
             dirChooserVisible: false,
             codeEditorComponentKey: 0,
-            code: "",
-            cancelPopUpVisible: false
+            code: ""
         } 
     },
     methods: {

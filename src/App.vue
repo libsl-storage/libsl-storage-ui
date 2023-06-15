@@ -41,5 +41,6 @@ html, body {
 
 .p-dialog-content { /* for PrimeVue component 'Dialog' */
     display: flex;
+	flex: 1;
 }
 </style>

@@ -20,40 +20,58 @@
         </div>
     </div>
 
+    <PopUp :visible="newSpecPopUpVisible" header="New specification" :modal="true" :closable="false" :draggable="false"
+        style="width: 90%; height: 80%">
+        <NewSpecPage @cancel="cancelNewSpecPopUpVisible = true" />
+    </PopUp>
+
+    <PopUp v-model:visible="cancelNewSpecPopUpVisible" header="Cancel" :modal="true" :draggable="false">
+        <div>
+            Your changes will be lost. Are you sure you want to continue?
+        </div>
+        <template #footer>
+            <Button label="No" @click="cancelNewSpecPopUpVisible = false" />
+            <Button label="Yes" @click="cancelNewSpecPopUpVisible = false; newSpecPopUpVisible = false"/>
+         </template>
+    </PopUp>
+
     <PopUp :visible="signOutPopUpVisible" @keydown.esc="signOutPopUpVisible = false"
 		:modal="true" :closable="false" :draggable="false">
 		Are you sure you want to sign out?
 		<template #footer>
 			<Button label="No" icon="pi pi-times" class="p-button-text"
 				@click="signOutPopUpVisible = false" />
-			<Button label="Yes" icon="pi pi-check" autofocus />
+			<Button label="Yes" icon="pi pi-check" autofocus 
+                @click="sign_out" />
 		</template>
 	</PopUp>
 </template>
 
 <script>
-import Menu from 'primevue/menu'
-import { mapGetters } from "vuex"
+import Menu from "primevue/menu"
+import NewSpecPage from "@/components/Pages/NewSpecPage.vue"
+import { mapGetters, mapActions } from "vuex"
 export default {
     name: "v-libsl-storage",
     components: {
-        Menu
+        Menu,
+        NewSpecPage
     },
     data() {
         return {
             items: [
                 {
                     icon: "pi pi-plus",
-                    label: "New spec",
+                    label: "New specification",
                     command: () => {
-                        this.$router.push({"path": "/new-specification"})
+                        this.newSpecPopUpVisible = true
                     }
                 },
                 {
                     icon: "pi pi-cog",
                     label: "Settings",
                     command: () => {
-                        this.$router.push({"path": "/account"})
+                        this.$router.push({"path": "/settings"})
                     }
                 },
                 {
@@ -67,6 +85,8 @@ export default {
                     }
                 }
             ],
+            newSpecPopUpVisible: false,
+            cancelNewSpecPopUpVisible: false,
             signOutPopUpVisible: false
         }
     },
@@ -76,7 +96,15 @@ export default {
         },
         account_pop_up_menu_toggle(event) {
             this.$refs.menu.toggle(event)
-        }
+        },
+        sign_out() {
+            this.signOutPopUpVisible = false
+            this.$router.replace({path: "/"})
+            this.setAuth(false)
+        },
+        ...mapActions([
+            "setAuth"
+        ])
     },
     computed: {
         ...mapGetters([

@@ -1,17 +1,20 @@
 <template>
     <div class="dir-item">
-        <div class="dir">
+        <div style="display: flex; align-items: center;">
             <div :class="expanded ? 'pi pi-angle-down' : 'pi pi-angle-right'" @click="expanded=!expanded" />
-            <div style="display: flex; flex: 1; align-items: center;" @click="$emit('setDir', getCurrentPath)">
-                <div class="pi pi-folder" style="margin-left: 0.3em; margin-right: 0.3em" />
-                <div>{{ dirName }}</div>
-                <div v-show="isCurrentDir" class="pi pi-check-circle"
-                    style="color: green; font-weight: bold; margin-left: 0.2em" />
+            <div :class="['dir', {'selected': isSelected}]" @click="$emit('setPath', path)">
+                <div class="pi pi-folder" style="margin: 0em 0.3em" />
+                <div class="dir-name">
+                    {{ getDirName }}
+                </div>
+                <div v-show="isSelected" class="pi pi-check-circle"
+                    style="font-weight: bold; margin-left: 0.5em" />
             </div>
         </div>
-        <div class="dir-content" v-if="expanded">
-            <!-- <v-dir-item v-for="item in content" :key="item.id" /> -->
-            <v-dir-item :parent="getCurrentPath" dirName="nested" :currentDir="currentDir" @setDir="setDir" />
+        <div v-if="expanded" style="padding-left: 1.2em">
+            <v-dir-item v-for="item in content" :key="item.id"
+                :path="getNestedPath(item)" :selectedPath="selectedPath"
+                @setPath="(path) => {$emit('setPath', path)}" />
         </div>
     </div>
 </template>
@@ -20,27 +23,30 @@
 export default {
     name: "v-dir-item",
     props: {
-        parent: String,
-        dirName: String,
-        currentDir: String
+        path: String,
+        selectedPath: String
     },
-    emits: ["setDir"],
+    emits: ["setPath"],
     data() {
         return {
-            expanded: false
+            expanded: false,
+            content: ["nested1", "nested2"]
         }
     },
     methods: {
-        setDir(path) {
-            this.$emit("setDir", path)
-        }
+        getNestedPath(nestedName) {
+            return `${this.path}/${nestedName}`
+        },
     },
     computed: {
-        isCurrentDir() {
-            return this.currentDir == this.getCurrentPath
+        getDirName() {
+            let index = this.path.length - 1
+            while (index > 0 && this.path[index - 1] != '/')
+                index--
+            return this.path.slice(index)
         },
-        getCurrentPath() {
-            return `${this.parent}/${this.dirName}`
+        isSelected() {
+            return this.path == this.selectedPath
         }
     }
 }
@@ -56,14 +62,15 @@ export default {
 
 .dir {
     display: flex;
+    flex: 1;
     align-items: center;
+}
+
+.dir-name:hover {
+    text-decoration: underline;
 }
 
 .selected {
     color: green;
-}
-
-.dir-content {
-    padding-left: 1.2em;
 }
 </style>

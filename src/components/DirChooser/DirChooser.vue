@@ -2,12 +2,12 @@
     <div id="dir-chooser">
         <div id="dir-list">
             <DirItem v-for="item in content" :key="item.id"
-                parent="." :dirName="item" :currentDir="dir" @setDir="setDir" />
+                :path="item" :selectedPath="selectedPath" @setPath="(path) => {selectedPath = path}" />
         </div>
         <div id="footer">
             <Button label="New folder" class="p-button-link" style="padding: 0em"
                 @click="newFolderPopUpVisible = true" />
-            <Button label="Ok" @click="$emit('setDir', this.dir)" />
+            <Button label="Ok" @click="$emit('setPath', selectedPath)" />
         </div>
     </div>
 
@@ -26,18 +26,13 @@ export default {
     components: {
         DirItem
     },
-    emits: ["setDir"],
+    emits: ["setPath"],
     data() {
         return {
             content: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'a', 'b', "c", "d", "e", "f"],
-            dir: ".",
+            selectedPath: "",
             newFolderPopUpVisible: false,
             newFolderName: ""
-        }
-    },
-    methods: {
-        setDir(path) {
-            this.dir = path
         }
     }
 }
@@ -57,7 +52,6 @@ export default {
     flex: 1;
     border-radius: 10px;
     padding-bottom: 0.5em;
-    background-color: whitesmoke;
     overflow: auto;
 }
 

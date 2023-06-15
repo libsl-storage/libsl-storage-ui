@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import httpRequestMixin from "@/httpRequestMixin"
+import mixin from "@/mixin"
 
 import PrimeVue from 'primevue/config'
 import "primevue/resources/themes/saga-blue/theme.css"
@@ -15,6 +15,7 @@ import Toast from "primevue/toast"
 import ToastService from "primevue/toastservice"
 import Dialog from "primevue/dialog"
 import Dropdown from "primevue/dropdown"
+import MultiSelect from 'primevue/multiselect'
 import Checkbox from "primevue/checkbox"
 import InputSwitch from 'primevue/inputswitch'
 import Tag from 'primevue/tag'
@@ -27,10 +28,11 @@ app.component(Button.name, Button)
 app.component(Toast.name, Toast)
 app.component("PopUp", Dialog)
 app.component(Dropdown.name, Dropdown)
+app.component(MultiSelect.name, MultiSelect)
 app.component(Checkbox.name, Checkbox)
 app.component(InputSwitch.name, InputSwitch)
 app.component(Tag.name, Tag)
 
 app.use(store).use(router).use(PrimeVue).use(ToastService)
-app.mixin(httpRequestMixin)
+app.mixin(mixin)
 app.mount('#app')
