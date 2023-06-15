@@ -4,8 +4,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN touch .env
-RUN echo "VUE_APP_ROOT_API=http://core:8080" > .env
 RUN npm run build
 
 # этап production (production-stage)
