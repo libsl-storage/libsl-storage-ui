@@ -4,7 +4,7 @@
             <div style="display: flex">
                 <Button icon="pi pi-chevron-circle-left" title="Back" @click="$router.push({path: '/'})"/>
                 <div style="display: flex; align-items: center; padding-left: 0.5em; font-size: large; font-weight: bold;">
-                    LibName
+                    {{libName}}
                 </div>
             </div>
             <Card class="card">
@@ -13,17 +13,24 @@
                     <div style="display: flex; flex-flow: column">
                         <div style="display: flex; align-items: center; margin-bottom: 0.5em">
                             <Checkbox v-model="show_code" :binary="true" />
-                            <div style="cursor: pointer; margin-left: 0.5em" @click="show_code=!show_code">
+                            <div style="margin-left: 0.5em">
                                 Code section
                             </div>
                         </div>
                         <div style="display: flex; align-items: center">
                             <Checkbox v-model="show_graph" :binary="true" />
-                            <div style="cursor: pointer; margin-left: 0.5em" @click="show_graph=!show_graph">
+                            <div style="margin-left: 0.5em">
                                 Graph section
+                                <Dropdown v-model="selected_graph" :options="graphs" optionLabel="name" />
                             </div>
                         </div>
                     </div>
+                </template>
+            </Card>
+            <Card class="card">
+                <template #title>Path</template>
+                <template #content>
+                    {{path}}
                 </template>
             </Card>
             <Card class="card">
@@ -38,14 +45,14 @@
             <Card class="card">
                 <template #title>Description</template>
                 <template #content>
-                    description
+                    {{description}}
                 </template>
             </Card>
         </div>
         <div v-show="show_code" style="display: flex; flex: 1; min-height: 20em;">
-            <LibSLCodeEditor :content="code" style="margin: 0.5em" />
+            <LibSLCodeEditor :content="sourceCode" style="margin: 0.5em" />
         </div>
-        <Graph v-show="show_graph" :model="graph_model" style="margin: 0.5em"/>
+        <Graph v-show="show_graph" :model="selected_graph.model" style="margin: 0.5em"/>
     </div>
 </template>
 
@@ -61,40 +68,46 @@ export default {
         LibSLCodeEditor,
         Graph
     },
+    mounted() {
+        this.fetchLibData()
+    },
     data() {
         return {
             show_code: true,
             show_graph: true,
-            code: "LibSL\n\t\tcode",
-            graph_model: {
-                nodes: [
-                    {
-                        data: {
-                            id: 0,
-                            name: "0"
-                        }
-                    },
-                    {
-                        data: {
-                            id: 1,
-                            name: "1"
-                        }
-                    },
-                ],
-               edges: [
-                    {
-                        data: {
-                            source: 0,
-                            target: 1
-                        }
-                    },
-                    {
-                        data: {
-                            source: 1,
-                            target: 0
-                        }
-                    },
-                ]
+
+            libName: "",
+            path: "",
+            description: "",
+
+            sourceCode: "",
+            graphs: [],
+            selected_graph: {}
+        }
+    },
+    methods: {
+        async fetchLibData() {
+            let r = await this.makeRequest("/specification/" + this.$route.params.id, "GET")
+            if (r.status == 404)  {
+                this.$router.push({"path": "/"})
+            } else if (r.status == 200)  {
+                let data = await r.json()
+                this.libName = data.name
+                this.path = data.path
+                this.description = data.description
+
+                r = await this.makeRequest("/specification/" + this.$route.params.id + "/content", "GET")
+                if (r.status == 200) {
+                    this.sourceCode = await r.text()
+                }
+
+                r = await this.makeRequest("/specification/" + this.$route.params.id + "/automaton/graph", "GET")
+                data = await r.json()
+                this.graphs = []
+                data.graphs.forEach((item) => {
+                    this.graphs.push({"name": item.name, "model": {"nodes": item.graph_model.nodes, "edges": item.graph_model.edges}})
+                })
+                this.selected_graph = this.graphs[0]
             }
         }
     },

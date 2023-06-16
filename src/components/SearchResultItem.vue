@@ -3,10 +3,11 @@
         <div style="margin: 0.5em 0em">
             {{ label }}
         </div>
+        <!--
         <div>
             <Tag class="tag" value="tag1" />
             <Tag class="tag" value="tag2" />
-        </div>
+        </div>-->
     </div>
 </template>
 

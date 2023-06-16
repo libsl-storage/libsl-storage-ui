@@ -20,16 +20,16 @@
                 <input id="selectFile" type="file" @change="onFileChange" style="display: none" />
                 <Button label="Browse" icon="pi pi-file" @click="openFileChooser" />
             </div>
-            <LibSLCodeEditor :content="code" :readonly="false" :key="codeEditorComponentKey"/>
+            <LibSLCodeEditor :content="code" :readonly="false" />
         </div>
         <div style="display: flex; justify-content: right;">
             <Button label="Cancel" icon="pi pi-times" severity="secondary" style="margin-right: 1em"
                 @click="$emit('cancel')" />
-            <Button label="Save" icon="pi pi-save" />
+            <Button label="Save" icon="pi pi-save" @click="save" />
         </div>
 
         <PopUp v-model:visible="dirChooserVisible" header="Choose folder" :modal="true" :draggable="false">
-            <DirChooser @setPath="setPath"/>
+            <DirChooser @select="setDir"/>
         </PopUp>
     </div>
 </template>
@@ -44,34 +44,66 @@ export default {
         LibSLCodeEditor
     },
     emits: [
-        "cancel"
+        "cancel",
+        "created"
     ],
     data() {
         return {
             libName: "",
             path: "",
+            dirId: null,
             tags: "",
             description: "",
             dirChooserVisible: false,
-            codeEditorComponentKey: 0,
+            sourceFile: null,
             code: ""
         } 
     },
     methods: {
-        setPath(path) {
-            this.path = path
+        setDir(data) {
+            this.path = data.path
+            this.dirId = data.dirId
             this.dirChooserVisible = false
         },
         openFileChooser() {
             document.getElementById("selectFile").click()
         },
         onFileChange(e) {
-            let files = e.target.files || e.dataTransfer.files // files[0]
+            let files = e.target.files || e.dataTransfer.files
+            this.sourceFile = files[0]
             let fr = new FileReader()
-            fr.readAsText(files[0])
+            fr.readAsText(this.sourceFile)
             fr.onload = (res) => {
                 this.code = res.target.result
-                this.codeEditorComponentKey += 1
+            }
+        },
+        async save() {
+            let r = await this.makeRequest("/specification", "POST", {
+                "name": this.libName,
+                "description": this.description,
+                "directoryId": this.dirId
+            })
+            if (r.status == 201) {
+                let data = await r.json()
+                
+                let formData = new FormData()
+                formData.append("lslFile", this.sourceFile)
+
+                let upload_r = await fetch(process.env.VUE_APP_ROOT_API + "/specification/" + data.id + "/upload", {
+                    method: "POST",
+                    credentials: "include",
+                    body: formData
+                })
+                if (upload_r.status == 200) {
+                    this.$toast.add({severity: "success", summary: "Specification created", life: 5000})
+                    this.$emit("created")
+                }
+            } else if (r.status == 400) {
+                this.$toast.add({severity: "error", summary: "Specification by specified path already exists", life: 5000})
+            } else if (r.status == 403) {
+                this.$toast.add({severity: "error", summary: "Only directory owner can create subdirectories", life: 5000})
+            } else if (r.status == 404) {
+                this.$toast.add({severity: "error", summary: "Specified parent directory not exists", life: 5000})
             }
         }
     }

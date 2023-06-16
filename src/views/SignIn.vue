@@ -56,14 +56,14 @@ export default {
   },
   methods: {
     async sign_in() {
-      let r = await this.httpRequest("/auth/login", "POST", {
+      let r = await this.makeRequest("/auth/login", "POST", {
         "email": this.email,
         "password": this.password
       })
       if (r.status == 200) {
         this.$router.replace({"path": "/"})
         this.setAuth(true)
-      } else {
+      } else if (r.status == 400) {
         this.$toast.add({severity: "error", summary: "Authentication failed", life: 5000})
         this.login = ""
         this.password = ""

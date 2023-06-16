@@ -63,7 +63,7 @@ export default {
       this.$router.push({path: "/sign-in"})
     },
     async sign_up() {
-      let r = await this.httpRequest("/account/register", "POST", {
+      let r = await this.makeRequest("/account/register", "POST", {
         "name": this.username,
         "email": this.email,
         "password": this.password
@@ -72,8 +72,8 @@ export default {
       if (r.status == 201) {
         this.$router.replace({"path": "/"})
         this.setAuth(true)
-      } else {
-        this.$toast.add({severity: "error", summary: "Registration failed", life: 5000})
+      } else if (r.status == 400) {
+        this.$toast.add({severity: "error", summary: "Specified email already taken", life: 5000})
       }
     },
     ...mapActions([

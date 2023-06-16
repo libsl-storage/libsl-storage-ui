@@ -1,7 +1,11 @@
 <template>
     <div id="libsl-storage">
         <div id="header">
-            <div id="title" @click="$router.push({path: '/'})">LibSL Storage</div>
+            <div id="title">
+                <div style="cursor: pointer" @click="$router.push({path: '/'})">
+                    LibSL Storage
+                </div>
+            </div>
             <div id="user">
                 <div v-if="isAuthenticated" style="display: flex; align-items: center; cursor: pointer" 
                     @click="account_pop_up_menu_toggle">
@@ -22,7 +26,7 @@
 
     <PopUp :visible="newSpecPopUpVisible" header="New specification" :modal="true" :closable="false" :draggable="false"
         style="width: 90%; height: 80%">
-        <NewSpecPage @cancel="cancelNewSpecPopUpVisible = true" />
+        <NewSpecPage @created="newSpecPopUpVisible = false" @cancel="cancelNewSpecPopUpVisible = true" />
     </PopUp>
 
     <PopUp v-model:visible="cancelNewSpecPopUpVisible" header="Cancel" :modal="true" :draggable="false">
@@ -98,9 +102,10 @@ export default {
             this.$refs.menu.toggle(event)
         },
         sign_out() {
+            this.makeRequest("/auth/logout", "POST")
             this.signOutPopUpVisible = false
-            this.$router.replace({path: "/"})
             this.setAuth(false)
+            this.$router.replace({path: "/"})
         },
         ...mapActions([
             "setAuth"
@@ -134,7 +139,6 @@ export default {
     display: flex;
     flex: 1;
     align-items: center;
-    cursor: pointer;
 }
 
 #user {

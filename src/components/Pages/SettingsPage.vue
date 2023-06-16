@@ -110,7 +110,7 @@
     },
     methods: {
       async loadUserData() {
-        let user_info_response = await this.httpRequest("/account", "GET")
+        let user_info_response = await this.makeRequest("/account", "GET")
         if (user_info_response.status == 200) {
           let data = await user_info_response.json()
           this.username = data["name"]
@@ -127,7 +127,7 @@
           })
           return
         }
-        let response = await this.httpRequest("/account", "POST", {
+        let response = await this.makeRequest("/account", "POST", {
           "name": this.new_username
         })
         if (response.status == 200) {
@@ -137,7 +137,7 @@
       },
       async change_password() {
         if (this.checkPasswordSecurity()) {
-          let response = await this.httpRequest("/account/updatePassword", "POST", {
+          let response = await this.makeRequest("/account/updatePassword", "POST", {
           "oldPassword": this.current_password,
           "newPassword": this.new_password
         })

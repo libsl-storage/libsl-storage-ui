@@ -6,14 +6,22 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex"
+import { mapGetters, mapActions } from "vuex"
 export default {
 	name: "app",
+    mounted() {
+        this.setAuth(document.cookie.includes("authFlag"))
+    },
+	methods: {
+        ...mapActions([
+            "setAuth"
+        ])
+	},
 	computed: {
 		...mapGetters([
 			"isDesktop"
 		])
-	}
+	},
 }
 </script>
 

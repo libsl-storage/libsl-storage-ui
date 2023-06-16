@@ -1,20 +1,21 @@
 <template>
     <div id="dir-chooser">
         <div id="dir-list">
-            <DirItem v-for="item in content" :key="item.id"
-                :path="item" :selectedPath="selectedPath" @setPath="(path) => {selectedPath = path}" />
+            <DirItem v-for="item in content.children" :key="item.id"
+                :dirId="item.id" :path="item.name" :selectedPath="selectedPath"
+                @select="selectDirHandler" />
         </div>
         <div id="footer">
             <Button label="New folder" class="p-button-link" style="padding: 0em"
-                @click="newFolderPopUpVisible = true" />
-            <Button label="Ok" @click="$emit('setPath', selectedPath)" />
+                @click="newFolderName = ''; newFolderPopUpVisible = true" />
+            <Button label="Ok" @click="$emit('select', {'dirId': selectedDirId, 'path': selectedPath})" />
         </div>
     </div>
 
     <PopUp v-model:visible="newFolderPopUpVisible" header="Create folder" :modal="true" :draggable="false">
         <InputText v-model="newFolderName" placeholder="Folder name" autofocus />
         <template #footer>
-            <Button label="Create" :disabled="newFolderName.length == 0" />
+            <Button label="Create" :disabled="newFolderName.length == 0" @click="createDir" />
         </template>
     </PopUp>
 </template>
@@ -26,13 +27,48 @@ export default {
     components: {
         DirItem
     },
-    emits: ["setPath"],
+    emits: ["select"],
+    mounted() {
+        this.fetchDirContent()
+    },
     data() {
         return {
-            content: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'a', 'b', "c", "d", "e", "f"],
+            content: [],
             selectedPath: "",
+            selectedDirId: null,
             newFolderPopUpVisible: false,
             newFolderName: ""
+        }
+    },
+    methods: {
+        async fetchDirContent() {
+            let r = await this.makeRequest("/directory/children", "GET")
+            this.content = await r.json()
+        },
+        selectDirHandler(data) {
+            if (data.id == this.selectedDirId) {
+                this.selectedDirId = null
+                this.selectedPath = ""
+            } else {
+                this.selectedDirId = data.id
+                this.selectedPath = data.path
+            }
+        },
+        async createDir() {
+            let r = await this.makeRequest("/directory", "POST", {
+                "name": this.newFolderName,
+                "parentId": this.selectedDirId
+            })
+            if (r.status == 201) {
+                await this.fetchDirContent()
+            } else if (r.status == 400) {
+                this.$toast.add({severity: "error", summary: "Such folder already exists", life: 5000})
+            } else if (r.status == 403) {
+                this.$toast.add({severity: "error", summary: "Only directory owner can create subdirectories", life: 5000})
+            } else if (r.status == 404) {
+                this.$toast.add({severity: "error", summary: "Specified parent directory not exists", life: 5000})
+            }
+            this.newFolderPopUpVisible = false
         }
     }
 }

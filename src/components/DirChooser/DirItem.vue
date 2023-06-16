@@ -1,8 +1,8 @@
 <template>
     <div class="dir-item">
         <div style="display: flex; align-items: center;">
-            <div :class="expanded ? 'pi pi-angle-down' : 'pi pi-angle-right'" @click="expanded=!expanded" />
-            <div :class="['dir', {'selected': isSelected}]" @click="$emit('setPath', path)">
+            <div :class="expanded ? 'pi pi-angle-down' : 'pi pi-angle-right'" @click="selectHandler" />
+            <div :class="['dir', {'selected': isSelected}]" @click="$emit('select', {'id': dirId, 'path': path})">
                 <div class="pi pi-folder" style="margin: 0em 0.3em" />
                 <div class="dir-name">
                     {{ getDirName }}
@@ -12,9 +12,9 @@
             </div>
         </div>
         <div v-if="expanded" style="padding-left: 1.2em">
-            <v-dir-item v-for="item in content" :key="item.id"
-                :path="getNestedPath(item)" :selectedPath="selectedPath"
-                @setPath="(path) => {$emit('setPath', path)}" />
+            <v-dir-item v-for="item in content.children" :key="item.id"
+                :dirId="item.id" :path="getNestedPath(item.name)" :selectedPath="selectedPath"
+                @select="(data) => {$emit('select', {'id': data.id, 'path': data.path})}" />
         </div>
     </div>
 </template>
@@ -23,20 +23,30 @@
 export default {
     name: "v-dir-item",
     props: {
+        dirId: Number,
         path: String,
         selectedPath: String
     },
-    emits: ["setPath"],
+    emits: ["select"],
     data() {
         return {
             expanded: false,
-            content: ["nested1", "nested2"]
+            content: []
         }
     },
     methods: {
+        async selectHandler() {
+            if (this.expanded) {
+                this.expanded = false
+            } else {
+                let r = await this.makeRequest("/directory/children/" + this.dirId, "GET")
+                this.content = await r.json()
+                this.expanded = true
+            }
+        },
         getNestedPath(nestedName) {
             return `${this.path}/${nestedName}`
-        },
+        }
     },
     computed: {
         getDirName() {

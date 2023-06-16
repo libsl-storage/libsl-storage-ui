@@ -17,13 +17,13 @@
             </div>
         </div>
         <div id="main">
-            <textarea id="row-counter" v-model="row_counter_content" readonly spellcheck="false"
+            <textarea id="row-counter" ref="row_counter" v-model="row_counter_content" readonly spellcheck="false"
                 :class="{'font10': font_size==10, 'font12': font_size==12, 'font14': font_size==14}" />
             <div id="editor">
-                <textarea id="code" v-model="code" spellcheck="false" :readonly="readonly"
+                <textarea id="code" ref="code" v-model="code" spellcheck="false" :readonly="readonly"
                     @keydown.tab.prevent="tab_handler" @keydown.enter.prevent="enter_handler"
                     :class="{'font10': font_size==10, 'font12': font_size==12, 'font14': font_size==14}" />
-                <pre id="highlighter"
+                <pre id="highlighter" ref="highlighter"
                     :class="{'font10': font_size==10, 'font12': font_size==12, 'font14': font_size==14}" />
             </div>
         </div>
@@ -45,9 +45,9 @@ export default {
     },
     mounted() {
         // sync scroll in textarea, pre and row counter
-        let code_el = document.getElementById("code")
-        let row_counter_el = document.getElementById("row-counter")
-        let highlighter_el = document.getElementById("highlighter")
+        let code_el = this.$refs.code
+        let row_counter_el = this.$refs.row_counter
+        let highlighter_el = this.$refs.highlighter
         code_el.addEventListener("scroll", () => {
             row_counter_el.scrollTop = code_el.scrollTop
             highlighter_el.scrollTop = code_el.scrollTop
@@ -63,7 +63,7 @@ export default {
     },
     updated() {
         if (this.new_cursor_pos != null) {
-            let el = document.getElementById("code")
+            let el = this.$refs.code
             el.selectionStart = this.new_cursor_pos
             el.selectionEnd = this.new_cursor_pos
             this.new_cursor_pos = null
@@ -71,7 +71,7 @@ export default {
     },
     data() {
         return {
-            font_size: 14,
+            font_size: 12,
             sizes: [10, 12, 14],
             row_count: 1,
             row_counter_content: "1",
@@ -85,7 +85,7 @@ export default {
             try { 
                 navigator.clipboard.writeText(this.code)
             } catch (e) { // the old method for some browsers
-                let code_el = document.getElementById("code")
+                let code_el = this.$refs.code
                 let oldContentEditable = code_el.contentEditable
                 let oldReadOnly = code_el.readOnly
                 let range = document.createRange()
@@ -108,14 +108,18 @@ export default {
             }
         },
         tab_handler() {
-            let code_el = document.getElementById("code")
+            if (this.readonly) return
+            
+            let code_el = this.$refs.code
             let before_tab = this.code.slice(0, code_el.selectionStart)
             let after_tab = this.code.slice(code_el.selectionEnd, this.code.length)
             this.code = before_tab + "\t" + after_tab
             this.new_cursor_pos = code_el.selectionStart + 1
         },
         enter_handler() {
-            let code_el = document.getElementById("code")
+            if (this.readonly) return
+
+            let code_el = this.$refs.code
             let before_enter = this.code.slice(0, code_el.selectionStart)
             let after_enter = this.code.slice(code_el.selectionEnd, this.code.length)
 
@@ -138,12 +142,15 @@ export default {
         }
     },
     watch: {
+        content() {
+            this.code = this.content
+        },
         code() { // row counting and code highlighting
             let strings = this.code.split("\n")
             let highlighted_code = ""
             for (let i = 0; i < strings.length; i++) {
                 let comments_start_pos = strings.at(i).search(/\/\//g)
-                if (comments_start_pos == -1) { // no comments
+                if (comments_start_pos == -1 || (comments_start_pos > 0 && strings.at(i).charAt(comments_start_pos - 1) == ':')) { // no comments
                     highlighted_code += strings.at(i).replaceAll(this.key_words, "<strong>$1$2$3</strong>")
                 } else {
                     highlighted_code +=
@@ -155,7 +162,7 @@ export default {
 
                 if (i != strings.length - 1) highlighted_code += "\n"
             }
-            document.getElementById("highlighter").innerHTML = highlighted_code            
+            this.$refs.highlighter.innerHTML = highlighted_code           
 
             if (strings.length != this.row_count) {
                 let counter = ""

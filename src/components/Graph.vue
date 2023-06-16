@@ -9,9 +9,6 @@ export default {
     props: {
       model: Object
     },
-    mounted() {
-      this.drawGraph()
-    },
     data() {
         return {
             
@@ -50,6 +47,11 @@ export default {
             edges: this.model.edges,
           }
         })
+      }
+    },
+    watch: {
+      model() {
+        this.drawGraph()
       }
     }
 }
