@@ -1,6 +1,7 @@
 # этап сборки (build stage)
 FROM node:lts-alpine as build-stage
 WORKDIR /app
+ARG SERVER_NAME=${{ secrets.SERVER_NAME }}
 COPY package*.json ./
 RUN npm install
 COPY . .
