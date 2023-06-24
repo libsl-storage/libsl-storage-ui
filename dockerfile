@@ -4,6 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+RUN echo "api addr is ${SERVER_NAME}"
 RUN npm run build
 
 # этап production (production-stage)
