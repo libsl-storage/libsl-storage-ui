@@ -21,8 +21,8 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
-        path: "/lib/:id",
-        component: () => import('@/components/Pages/LibPage.vue')
+        path: "/spec/:id",
+        component: () => import('@/components/Pages/SpecPage.vue')
       }
     ]
   },

@@ -25,7 +25,7 @@
     </div>
 
     <PopUp :visible="newSpecPopUpVisible" header="New specification" :modal="true" :closable="false" :draggable="false"
-        style="width: 90%; height: 80%">
+        style="width: 90%; height: 90%">
         <NewSpecPage @created="newSpecPopUpVisible = false" @cancel="cancelNewSpecPopUpVisible = true" />
     </PopUp>
 

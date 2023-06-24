@@ -1,13 +1,17 @@
 <template>
     <div class="search-result-item" @click="$router.push({path: '/lib'})">
-        <div style="margin: 0.5em 0em">
-            {{ label }}
+        <div style="display: flex; margin: 0.5em 0em">
+            <div style="display: flex; align-items: center;">
+                {{ label }}
+            </div>
+            <div style="margin-left: 0.5em; color: grey">
+                {{ path }}
+                
+            </div>
         </div>
-        <!--
         <div>
-            <Tag class="tag" value="tag1" />
-            <Tag class="tag" value="tag2" />
-        </div>-->
+            <Tag v-for="item in tags" :key="item.id" class="tag" :value="item.value" />
+        </div>
     </div>
 </template>
 
@@ -15,7 +19,9 @@
 export default {
     name: "v-search-result-item",
     props: {
-        label: String
+        label: String,
+        path: String,
+        tags: Array
     },
     data() {
         return {

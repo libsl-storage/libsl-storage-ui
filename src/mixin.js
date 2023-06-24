@@ -3,7 +3,7 @@ export default {
     async makeRequest(url, method, payload = null) {
       let body = payload ? JSON.stringify(payload) : null
       let r = await this.httpRequest(url, method, body)
-      if (r.status == 401) { // access-token expired
+      if (r.status == 403) { // 401 access-token expired
         let refresh_r = await this.httpRequest("/auth/refresh", "POST")
         if (refresh_r.status == 200) {
           r = await this.httpRequest(url, method, body)

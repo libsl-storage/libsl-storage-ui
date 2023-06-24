@@ -9,15 +9,15 @@
                 </div>
                 <MultiSelect v-model="selected_filters" :options="filters" optionLabel="title" placeholder="Select filters" display="chip" />
                 <div v-for="item in selected_filters" :key="item.id" class="filter-item">
-                    <InputText v-model="item.value" style="flex: 1" :placeholder="item.title" />
+                    <InputText v-model="item.value" style="flex: 1" :placeholder="item.title" @keydown.enter="applyFilters(0)" />
                 </div>
             </div>
             <div style="display: flex; justify-content: center; margin-top: 1.5em">
-                <Button id="search-options-btn" label="Apply filters" @click="applyFilters" />
+                <Button id="search-options-btn" label="Apply filters" @click="applyFilters(0)" />
             </div>
         </div>
         <div v-show="isDesktop || (isMobile && !search_options_mobile_visible)" id="result-panel">
-            <div v-show="isMobile">
+            <div v-show="isMobile" style="display: flex; justify-content: end;">
                 <Button id="search-options-btn" icon="pi pi-sliders-h" label="Filters" link
                     @click="search_options_mobile_visible = !search_options_mobile_visible" />
             </div>
@@ -26,10 +26,11 @@
             </div>
             <div v-show="searchResult.length != 0" id="list">
                 <SearchResultItem v-for="item in searchResult.content" :key="item.id"
-                    :label="item.name" @click="$router.push({'path': '/lib/' + item.id})" />
+                    :label="item.name" :path="item.path" :tags="item.tags"
+                    @click="$router.push({'path': '/spec/' + item.id})" />
             </div>
-            <div id="page-switch">
-                <Button label="1" text rounded />
+            <div v-show="searchResult.length != 0" id="page-switch">
+                <Paginator v-model:first="paginator" :rows="searchResult.size" :totalRecords="searchResult.totalElements" />
             </div>
         </div>
     </div>
@@ -37,22 +38,29 @@
 
 <script>
 import SearchResultItem from "@/components/SearchResultItem.vue"
+import Paginator from "primevue/paginator"
 import { mapGetters, mapActions } from "vuex"
 export default {
     name: "v-search",
     components: {
-        SearchResultItem
+        SearchResultItem,
+        Paginator
     },
     mounted() {
-        this.fetchFilters()
+        this.showOnlyMySpec = this.isShowOnlyMySpecs
+        this.filters = this.getFilters
+        if (this.filters.length == 0) this.fetchFilters()
+        this.selected_filters = this.getSelectedFilters
+        this.searchResult = this.getSearchResult
     },
     data() {
         return {
             search_options_mobile_visible: false,
-            showOnlyMySpec: false,
+            showOnlyMySpec: false, // ???
             filters: [],
             selected_filters: [],
-            searchResult: []
+            searchResult: [],
+            paginator: 0
         }
     },
     methods: {
@@ -63,17 +71,19 @@ export default {
             for (const item in data.keys) {
                 this.filters.push({"title": data.keys[item].title, "key": data.keys[item].key, "value": ""})
             }
+            this.setFilters(this.filters)
         },
-        async applyFilters() {
+        async applyFilters(page_number) {
             let filter_list = []
             this.selected_filters.forEach((item) => {
                 filter_list.push({"key": item.key, "value": item.value})
             })
             let r = await this.makeRequest("/specification/page", "POST", {
-                "page": 0,
+                "page": page_number,
                 "filters": filter_list
             })
             this.searchResult = await r.json()
+            this.setSearchResult(this.searchResult)
 
             if (this.isMobile) {
                 this.search_options_mobile_visible = !this.search_options_mobile_visible
@@ -96,6 +106,17 @@ export default {
             "getSelectedFilters",
             "getSearchResult"
         ])
+    },
+    watch: {
+        showOnlyMySpec() {
+            this.setShowOnlyMySpecs(this.showOnlyMySpec)
+        },
+        selected_filters() {
+            this.setSelectedFilters(this.selected_filters)
+        },
+        paginator() {
+            this.applyFilters(this.paginator / this.searchResult.size)
+        }
     }
 }
 </script>
@@ -156,5 +177,6 @@ export default {
 #page-switch {
     display: flex;
     justify-content: center;
+    margin-top: 1em;
 }
 </style>

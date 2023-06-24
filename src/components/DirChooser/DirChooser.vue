@@ -1,6 +1,10 @@
 <template>
     <div id="dir-chooser">
         <div id="dir-list">
+            <div v-show="content.children != null && content.children.length == 0"
+                style="display: flex; justify-content: center; color: grey">
+                Empty
+            </div>
             <DirItem v-for="item in content.children" :key="item.id"
                 :dirId="item.id" :path="item.name" :selectedPath="selectedPath"
                 @select="selectDirHandler" />

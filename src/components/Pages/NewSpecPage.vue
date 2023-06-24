@@ -1,7 +1,7 @@
 <template>
     <div id="new-spec">
         <div class="property">
-            <InputText v-model="libName" placeholder="Lib name" style="width: 100%" autofocus />
+            <InputText v-model="libName" placeholder="Name" style="width: 100%" autofocus />
         </div>
         <div class="property">
             <div style="flex: 1; margin-right: 1em">
@@ -13,20 +13,49 @@
             <InputText v-model="description" placeholder="Description" style="width: 100%" />
         </div>
         <div class="property">
-            <InputText v-model="tags" placeholder="Tags" style="width: 100%" />
+            <div style="display: flex; align-items: center; flex: 1; padding: 0.5em; margin-right: 1em; border: 1px solid #ced4da; border-radius: 3px;">
+                <div v-show="tags.length == 0" style="color: #B6B6B4">
+                    Tags
+                </div>
+                <div v-show="tags.length != 0">
+                    <Tag v-for="item in tags" :key="item.id" class="tag">
+                        {{ item.key + ':' + item.value }}
+                        <i class="pi pi-times text-xs" style="margin-left: 1em; font-size: 0.8em; cursor: pointer"
+                            @click="deleteTag(item.key, item.value)" />
+                    </Tag>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <Button icon="pi pi-plus" @click="newTagKey = ''; newTagValue = ''; createTagPopUpVisible = true" />
+            </div>
         </div>
         <div class="property" style="display: flex; flex-flow: column; flex: 1">
             <div style="display: flex; justify-content: right; margin-bottom: 0.5em">
                 <input id="selectFile" type="file" @change="onFileChange" style="display: none" />
-                <Button label="Browse" icon="pi pi-file" @click="openFileChooser" />
+                <Button label="Select file" icon="pi pi-file" @click="openFileChooser" />
             </div>
-            <LibSLCodeEditor :content="code" :readonly="false" />
+            <LibSLCodeEditor v-model:content="code" :readonly="false" />
         </div>
         <div style="display: flex; justify-content: right;">
             <Button label="Cancel" icon="pi pi-times" severity="secondary" style="margin-right: 1em"
                 @click="$emit('cancel')" />
-            <Button label="Save" icon="pi pi-save" @click="save" />
+            <Button label="Save" icon="pi pi-save" @click="save"
+                :disabled="libName.length == 0 || path.length == 0 || code.length == 0" />
         </div>
+
+        <PopUp v-model:visible="createTagPopUpVisible" header="New tag" :modal="true" :draggable="false">
+            <div style="display: flex; flex-flow: column;">
+                <div style="margin-bottom: 1em">
+                    <InputText v-model="newTagKey" placeholder="Key" autofocus />
+                </div>
+                <div>
+                    <InputText v-model="newTagValue" placeholder="Value" />
+                </div>
+            </div>
+            <template #footer>
+              <Button label="Apply" :disabled="newTagKey.length == 0 || newTagValue.length == 0" @click="addTag" />
+            </template>
+        </PopUp>
 
         <PopUp v-model:visible="dirChooserVisible" header="Choose folder" :modal="true" :draggable="false">
             <DirChooser @select="setDir"/>
@@ -50,12 +79,18 @@ export default {
     data() {
         return {
             libName: "",
+            
             path: "",
             dirId: null,
-            tags: "",
-            description: "",
             dirChooserVisible: false,
-            sourceFile: null,
+            
+            description: "",
+            
+            createTagPopUpVisible: false,
+            newTagKey: "",
+            newTagValue: "",
+            tags: [],
+
             code: ""
         } 
     },
@@ -70,11 +105,22 @@ export default {
         },
         onFileChange(e) {
             let files = e.target.files || e.dataTransfer.files
-            this.sourceFile = files[0]
             let fr = new FileReader()
-            fr.readAsText(this.sourceFile)
-            fr.onload = (res) => {
-                this.code = res.target.result
+            fr.readAsText(files[0])
+            fr.onload = (res) => { this.code = res.target.result }
+        },
+        addTag() {
+            this.tags.push({"key": this.newTagKey, "value": this.newTagValue})
+            this.createTagPopUpVisible = false
+        },
+        deleteTag(tagKey, tagValue) {
+            let i = 0
+            while (i < this.tags.length) {
+                if (this.tags[i].key == tagKey && this.tags[i].value == tagValue) {
+                    this.tags.splice(i, 1)
+                    break
+                }
+                i++
             }
         },
         async save() {
@@ -85,10 +131,18 @@ export default {
             })
             if (r.status == 201) {
                 let data = await r.json()
-                
-                let formData = new FormData()
-                formData.append("lslFile", this.sourceFile)
 
+                for (let i = 0; i < this.tags.length; i++) {
+                    this.makeRequest("/specification/" + data.id + "/tag", "POST", {
+                        "key": this.tags[i].key,
+                        "value": this.tags[i].value
+                    })
+                }
+
+                const source_file = new Blob([this.code], { type: "text/plain" })
+                let formData = new FormData()
+                formData.append("lslFile", source_file)
+                
                 let upload_r = await fetch(process.env.VUE_APP_ROOT_API + "/specification/" + data.id + "/upload", {
                     method: "POST",
                     credentials: "include",

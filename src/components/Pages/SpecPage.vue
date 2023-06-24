@@ -1,10 +1,17 @@
 <template>
-    <div id="lib-page" :class="{'lib-page-mobile': isMobile}">
-        <div id="lib-info" style="flex-flow: column">
+    <div id="spec-page" :class="{'spec-page-mobile': isMobile}">
+        <div id="spec-info" style="flex-flow: column">
             <div style="display: flex">
-                <Button icon="pi pi-chevron-circle-left" title="Back" @click="$router.push({path: '/'})"/>
-                <div style="display: flex; align-items: center; padding-left: 0.5em; font-size: large; font-weight: bold;">
-                    {{libName}}
+                <div>
+                    <Button icon="pi pi-chevron-circle-left" title="Back" @click="$router.push({path: '/'})"/>
+                </div>
+                <div style="display: flex; flex-flow: column; justify-content: center; padding-left: 0.5em; font-size: large; font-weight: bold;">
+                    <div>
+                        {{ name }}
+                    </div>
+                    <div style="color: grey">
+                        {{ path }}
+                    </div>
                 </div>
             </div>
             <Card class="card">
@@ -28,17 +35,11 @@
                 </template>
             </Card>
             <Card class="card">
-                <template #title>Path</template>
-                <template #content>
-                    {{path}}
-                </template>
-            </Card>
-            <Card class="card">
                 <template #title>Tags</template>
                 <template #content>
-                    <div style="margin-top: 1em">
-                        <Tag class="tag" value="tag1" />
-                        <Tag class="tag" value="tag1" />
+                    <div v-for="group in tagGroups" :key="group.id" style="margin-bottom: 0.5em;">
+                        {{ group.key }}:
+                        <Tag v-for="tag in group.tags" :key="tag.id" class="tag" :value="tag.value" />
                     </div>
                 </template>
             </Card>
@@ -52,7 +53,7 @@
         <div v-show="show_code" style="display: flex; flex: 1; min-height: 20em;">
             <LibSLCodeEditor :content="sourceCode" style="margin: 0.5em" />
         </div>
-        <Graph v-show="show_graph" :model="selected_graph.model" style="margin: 0.5em"/>
+        <Graph v-show="show_graph" :model="getGraphModel" style="margin: 0.5em"/>
     </div>
 </template>
 
@@ -62,23 +63,24 @@ import LibSLCodeEditor from '@/components/CodeEditor/LibSLCodeEditor.vue'
 import Graph from '@/components/Graph.vue'
 import { mapGetters } from 'vuex'
 export default {
-    name: "v-lib-page",
+    name: "v-spec-page",
     components: {
         Card,
         LibSLCodeEditor,
         Graph
     },
     mounted() {
-        this.fetchLibData()
+        this.fetchSpecData()
     },
     data() {
         return {
             show_code: true,
             show_graph: true,
 
-            libName: "",
+            name: "",
             path: "",
             description: "",
+            tagGroups: [],
 
             sourceCode: "",
             graphs: [],
@@ -86,15 +88,20 @@ export default {
         }
     },
     methods: {
-        async fetchLibData() {
+        async fetchSpecData() {
             let r = await this.makeRequest("/specification/" + this.$route.params.id, "GET")
             if (r.status == 404)  {
                 this.$router.push({"path": "/"})
             } else if (r.status == 200)  {
                 let data = await r.json()
-                this.libName = data.name
+                this.name = data.name
                 this.path = data.path
                 this.description = data.description
+
+                r = await this.makeRequest("/specification/" + this.$route.params.id + "/tag", "GET")
+                if (r.status == 200) {
+                    this.tagGroups = (await r.json()).tagGroups
+                }
 
                 r = await this.makeRequest("/specification/" + this.$route.params.id + "/content", "GET")
                 if (r.status == 200) {
@@ -112,6 +119,9 @@ export default {
         }
     },
     computed: {
+        getGraphModel() {
+            return (this.selected_graph) ? this.selected_graph.model : {}
+        },
         ...mapGetters([
             "isMobile"
         ])
@@ -130,18 +140,18 @@ export default {
 </script>
 
 <style scoped>
-#lib-page {
+#spec-page {
     display: flex;
     flex: 1;
     padding: 1em 0.5em;
     overflow: auto;
 }
 
-.lib-page-mobile {
+.spec-page-mobile {
     flex-flow: column;
 }
 
-#lib-info {
+#spec-info {
     min-width: 15em;
     margin: 0.5em;
 }
