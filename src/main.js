@@ -17,7 +17,6 @@ import Dialog from "primevue/dialog"
 import Dropdown from "primevue/dropdown"
 import MultiSelect from 'primevue/multiselect'
 import Checkbox from "primevue/checkbox"
-import InputSwitch from 'primevue/inputswitch'
 import Tag from 'primevue/tag'
 
 const app = createApp(App)
@@ -30,7 +29,6 @@ app.component("PopUp", Dialog)
 app.component(Dropdown.name, Dropdown)
 app.component(MultiSelect.name, MultiSelect)
 app.component(Checkbox.name, Checkbox)
-app.component(InputSwitch.name, InputSwitch)
 app.component(Tag.name, Tag)
 
 app.use(store).use(router).use(PrimeVue).use(ToastService)

@@ -16,8 +16,8 @@
         </div>
     </div>
 
-    <PopUp v-model:visible="newFolderPopUpVisible" header="Create folder" :modal="true" :draggable="false">
-        <InputText v-model="newFolderName" placeholder="Folder name" autofocus />
+    <PopUp v-model:visible="newFolderPopUpVisible" header="New folder" :modal="true" :draggable="false">
+        <InputText v-model="newFolderName" placeholder="Name" autofocus />
         <template #footer>
             <Button label="Create" :disabled="newFolderName.length == 0" @click="createDir" />
         </template>

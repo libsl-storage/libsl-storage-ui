@@ -1,23 +1,33 @@
 <template>
-    <div id="graph" />
+  <div id="graph">
+    <div id="canvas" />
+    <div style="position: absolute; margin: 0.3em">
+      <Dropdown v-model="selected_graph" :options="content" optionLabel="name" />
+      <Button icon="pi pi-refresh" text rounded style="margin-left: 0.2em" title="Reload" @click="drawGraph" />
+    </div>
+  </div>
 </template>
 
 <script>
-import cytoscape from 'cytoscape'
+import cytoscape from "cytoscape"
 export default {
     name: "v-graph",
     props: {
-      model: Object
+      content: Array, // [{"name": "graph name", "model": {"nodes": {...}, "edges": {...}}},...]
+      reload: Number
     },
     data() {
         return {
-            
+          selected_graph: null,
+          cy: null
         }
     },
     methods: {
       drawGraph() {
-        cytoscape({
-          container: document.getElementById("graph"),
+        if (!this.selected_graph) return
+        
+        this.cy = cytoscape({
+          container: document.getElementById("canvas"),
           autoungrabify: true,
           //autounselectify: true,
           style: cytoscape
@@ -43,14 +53,20 @@ export default {
               "target-arrow-color": "black"
             }),
           elements: {
-            nodes: this.model.nodes,
-            edges: this.model.edges,
+            nodes: this.selected_graph.model.nodes,
+            edges: this.selected_graph.model.edges
           }
         })
       }
     },
     watch: {
-      model() {
+      content() {
+        this.selected_graph = this.content[0]
+      },
+      reload() {
+        this.drawGraph()
+      },
+      selected_graph() {
         this.drawGraph()
       }
     }
@@ -61,8 +77,14 @@ export default {
 #graph {
   display: flex;
   flex: 1;
-  min-height: 20em;
+  position: relative;
   background-color: white;
-  border: solid 1px black;
+  border: solid 1px grey;
+}
+
+#canvas {
+  display: flex;
+  flex: 1;
+  margin: 1.5em 0em;
 }
 </style>

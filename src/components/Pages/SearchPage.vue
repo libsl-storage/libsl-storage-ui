@@ -3,10 +3,6 @@
         <div id="search-options-panel" :class="{'search-options-panel-mobile': isMobile,
             'search-options-panel-mobile-visible': isMobile && search_options_mobile_visible}">
             <div style="display: flex; flex-flow: column; flex: 1">
-                <div v-show="isAuthenticated" style="display: flex; padding: 0em 0.2em; margin-bottom: 1em">
-                    <label style="display: flex; flex: 1; align-items: center">Show only my specs</label>
-                    <InputSwitch v-model="showOnlyMySpec" />
-                </div>
                 <MultiSelect v-model="selected_filters" :options="filters" optionLabel="title" placeholder="Select filters" display="chip" />
                 <div v-for="item in selected_filters" :key="item.id" class="filter-item">
                     <InputText v-model="item.value" style="flex: 1" :placeholder="item.title" @keydown.enter="applyFilters(0)" />
@@ -29,7 +25,7 @@
                     :label="item.name" :path="item.path" :tags="item.tags"
                     @click="$router.push({'path': '/spec/' + item.id})" />
             </div>
-            <div v-show="searchResult.length != 0" id="page-switch">
+            <div v-show="searchResult.totalPages > 1" id="page-switch">
                 <Paginator v-model:first="paginator" :rows="searchResult.size" :totalRecords="searchResult.totalElements" />
             </div>
         </div>
@@ -47,7 +43,6 @@ export default {
         Paginator
     },
     mounted() {
-        this.showOnlyMySpec = this.isShowOnlyMySpecs
         this.filters = this.getFilters
         if (this.filters.length == 0) this.fetchFilters()
         this.selected_filters = this.getSelectedFilters
@@ -56,7 +51,6 @@ export default {
     data() {
         return {
             search_options_mobile_visible: false,
-            showOnlyMySpec: false, // ???
             filters: [],
             selected_filters: [],
             searchResult: [],
@@ -90,7 +84,6 @@ export default {
             }
         },
         ...mapActions([
-            "setShowOnlyMySpecs",
             "setFilters",
             "setSelectedFilters",
             "setSearchResult"
@@ -101,16 +94,12 @@ export default {
             "isDesktop",
             "isMobile",
             "isAuthenticated",
-            "isShowOnlyMySpecs",
             "getFilters",
             "getSelectedFilters",
             "getSearchResult"
         ])
     },
     watch: {
-        showOnlyMySpec() {
-            this.setShowOnlyMySpecs(this.showOnlyMySpec)
-        },
         selected_filters() {
             this.setSelectedFilters(this.selected_filters)
         },

@@ -1,6 +1,7 @@
 export default [
     "library",
     "import",
+	"include",
     "types",
     "automaton",
     "fun",
@@ -9,11 +10,15 @@ export default [
     "state",
     "finishstate",
     "new",
+	"self",
     "shift",
+	"by",
     "this",
     "action",
     "result",
     "if",
     "else",
-    "when"
+    "when",
+	"int",
+	"any"
 ]

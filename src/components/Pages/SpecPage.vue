@@ -1,6 +1,6 @@
 <template>
     <div id="spec-page" :class="{'spec-page-mobile': isMobile}">
-        <div id="spec-info" style="flex-flow: column">
+        <div id="spec-info" :class="{'spec-info-desktop': isDesktop}">
             <div style="display: flex">
                 <div>
                     <Button icon="pi pi-chevron-circle-left" title="Back" @click="$router.push({path: '/'})"/>
@@ -15,30 +15,10 @@
                 </div>
             </div>
             <Card class="card">
-                <template #title>Visibility</template>
-                <template #content>
-                    <div style="display: flex; flex-flow: column">
-                        <div style="display: flex; align-items: center; margin-bottom: 0.5em">
-                            <Checkbox v-model="show_code" :binary="true" />
-                            <div style="margin-left: 0.5em">
-                                Code section
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center">
-                            <Checkbox v-model="show_graph" :binary="true" />
-                            <div style="margin-left: 0.5em">
-                                Graph section
-                                <Dropdown v-model="selected_graph" :options="graphs" optionLabel="name" />
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </Card>
-            <Card class="card">
                 <template #title>Tags</template>
                 <template #content>
-                    <div v-for="group in tagGroups" :key="group.id" style="margin-bottom: 0.5em;">
-                        {{ group.key }}:
+                    <div v-for="group in tagGroups" :key="group.id" style="margin-bottom: 0.5em">
+                        <span style="margin-right: 0.2em; text-transform: capitalize">{{ group.key }}:</span>
                         <Tag v-for="tag in group.tags" :key="tag.id" class="tag" :value="tag.value" />
                     </div>
                 </template>
@@ -46,14 +26,33 @@
             <Card class="card">
                 <template #title>Description</template>
                 <template #content>
-                    {{description}}
+                    <div style="word-wrap: break-word;">
+                        {{description}}
+                    </div>
+                </template>
+            </Card>
+            <Card class="card">
+                <template #title>Visibility</template>
+                <template #content>
+                    <div style="display: flex; flex-flow: column">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5em">
+                            <Checkbox v-model="show_code" :binary="true" />
+                            <div style="margin-left: 0.5em; cursor: pointer" @click="show_code = !show_code">
+                                Code section
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center">
+                            <Checkbox v-model="show_graph" :binary="true" />
+                            <div style="margin-left: 0.5em; cursor: pointer" @click="show_graph = !show_graph">
+                                Graph section
+                            </div>
+                        </div>
+                    </div>
                 </template>
             </Card>
         </div>
-        <div v-show="show_code" style="display: flex; flex: 1; min-height: 20em;">
-            <LibSLCodeEditor :content="sourceCode" style="margin: 0.5em" />
-        </div>
-        <Graph v-show="show_graph" :model="getGraphModel" style="margin: 0.5em"/>
+        <LibSLCodeEditor v-show="show_code" :content="sourceCode" style="min-height: 20em; margin: 0.2em 0.5em" />
+        <Graph v-show="show_graph" :content="graphs" :reload="graphReloadKey" style="min-height: 20em; margin: 0.2em 0.5em" />
     </div>
 </template>
 
@@ -84,7 +83,7 @@ export default {
 
             sourceCode: "",
             graphs: [],
-            selected_graph: {}
+            graphReloadKey: 0
         }
     },
     methods: {
@@ -114,26 +113,28 @@ export default {
                 data.graphs.forEach((item) => {
                     this.graphs.push({"name": item.name, "model": {"nodes": item.graph_model.nodes, "edges": item.graph_model.edges}})
                 })
-                this.selected_graph = this.graphs[0]
             }
         }
     },
     computed: {
-        getGraphModel() {
-            return (this.selected_graph) ? this.selected_graph.model : {}
-        },
         ...mapGetters([
-            "isMobile"
+            "isMobile",
+            "isDesktop"
         ])
     },
     watch: {
-        show_code() {
-            if (!this.show_code && !this.show_graph)
-                this.show_graph = true
+        async show_code(code_visible) {
+            if (code_visible) {
+                if (this.show_graph) {
+                    await new Promise(resolve => setTimeout(resolve, 5))
+                    this.graphReloadKey++
+                }
+            } else {
+                if (!this.show_graph) this.show_graph = true
+            }
         },
-        show_graph() {
-            if (!this.show_graph && !this.show_code)
-                this.show_code = true
+        show_graph(graph_visible) {
+            if (!graph_visible && !this.show_code) this.show_code = true
         }
     }
 }
@@ -152,12 +153,16 @@ export default {
 }
 
 #spec-info {
-    min-width: 15em;
-    margin: 0.5em;
+    display: flex;
+    flex-flow: column;
+}
+
+.spec-info-desktop {
+    width: 16em;
 }
 
 .card {
-    margin: 1em 0em;
+    margin: 0.3em 0em;
 }
 
 .tag {

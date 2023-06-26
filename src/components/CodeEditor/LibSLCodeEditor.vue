@@ -145,13 +145,8 @@ export default {
             // forced textarea scrolling
             code_el.blur()
             code_el.focus()
-        }
-    },
-    watch: {
-        content() {
-            this.code = this.content
         },
-        code() { // code highlighting and row counting
+        code_handler() { // code highlighting and row counting
             let highlighted = ""
             let row_ctr = 1
             let STATES = {"code": 0, "single_quote": 1, "double_quote": 2, "single_line_comment": 3, "multi_line_comment": 4}
@@ -161,46 +156,41 @@ export default {
                 if (this.code.charAt(i) == "\n") row_ctr++
                 switch (state) {
                     case STATES.code:
-                        if (i + 1 == this.code.length) {
-                            highlighted += this.code.slice(start_index, i + 1)
-                                .replaceAll(this.key_words, "<span style='color:blue; font-weight:bold'>$1$2$3</span>") // key words
-                        } else {
-                            if (this.code.charAt(i) == "'") state = STATES.single_quote
-                            if (this.code.charAt(i) == "\"") state = STATES.double_quote
-                            if (this.code.charAt(i) == "/" && this.code.charAt(i + 1) == "/") state = STATES.single_line_comment
-                            if (this.code.charAt(i) == "/" && this.code.charAt(i + 1) == "*") state = STATES.multi_line_comment
+                        if (this.code.charAt(i) == "'") state = STATES.single_quote
+                        if (this.code.charAt(i) == "\"") state = STATES.double_quote
+                        if (this.code.charAt(i) == "/" && this.code.charAt(i + 1) == "/") state = STATES.single_line_comment
+                        if (this.code.charAt(i) == "/" && this.code.charAt(i + 1) == "*") state = STATES.multi_line_comment
 
-                            if (state != STATES.code) {
-                                highlighted += this.code.slice(start_index, i)
-                                    .replaceAll(this.key_words, "<span style='color:blue; font-weight:bold'>$1$2$3</span>") // key words
-                                start_index = i
-                            }
+                        if (state != STATES.code || i + 1 == this.code.length) {
+                            highlighted += this.code.slice(start_index, (i + 1 == this.code.length) ? i + 1 : i).replaceAll("<", "&#60;")
+                                .replaceAll(this.key_words, "<span style='color:blue; font-weight:bold'>$1$2$3</span>") // key words
+                            start_index = i
                         }
                         break
                     case STATES.single_quote:
                         if (/^['\n]$/.test(this.code.charAt(i)) || i + 1 == this.code.length) {
-                            highlighted += "<span style='color:green'>" + this.code.slice(start_index, i + 1) + "</span>"
+                            highlighted += "<span style='color:green'>" + this.code.slice(start_index, i + 1).replaceAll("<", "&#60;") + "</span>"
                             start_index = i + 1
                             state = STATES.code
                         }
                         break
                     case STATES.double_quote:
                         if (/^["\n]*$/.test(this.code.charAt(i)) || i + 1 == this.code.length) {
-                            highlighted += "<span style='color:green'>" + this.code.slice(start_index, i + 1) + "</span>"
+                            highlighted += "<span style='color:green'>" + this.code.slice(start_index, i + 1).replaceAll("<", "&#60;") + "</span>"
                             start_index = i + 1
                             state = STATES.code
                         }
                         break
                     case STATES.single_line_comment:
                         if (/^[\n]*$/.test(this.code.charAt(i)) || i + 1 == this.code.length) {
-                            highlighted += "<span style='color:grey'>" + this.code.slice(start_index, i + 1) + "</span>"
+                            highlighted += "<span style='color:grey'>" + this.code.slice(start_index, i + 1).replaceAll("<", "&#60;") + "</span>"
                             start_index = i + 1
                             state = STATES.code
                         }
                         break
                     case STATES.multi_line_comment:
                         if ((this.code.charAt(i) == "*" && this.code.charAt(i + 1) == "/") || i + 1 == this.code.length) {
-                            highlighted += "<span style='color:grey'>" + this.code.slice(start_index, i + 2) + "</span>"
+                            highlighted += "<span style='color:grey'>" + this.code.slice(start_index, i + 2).replaceAll("<", "&#60;") + "</span>"
                             start_index = i + 2
                             state = STATES.code
                         }
@@ -217,6 +207,14 @@ export default {
                 this.row_counter_content = counter
             }
         }
+    },
+    watch: {
+        content() {
+            this.code = this.content
+        },
+        code() { 
+            this.code_handler()
+        }
     }
 }
 </script>
@@ -227,7 +225,7 @@ export default {
     flex-flow: column;
     flex: 1;
     overflow: hidden;
-    border: 1px solid black;
+    border: 1px solid grey;
     background-color: white;
 }
 
@@ -235,7 +233,7 @@ export default {
     display: flex;
     align-items: center;
     padding: 0.25em;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid grey;
 }
 
 #main {

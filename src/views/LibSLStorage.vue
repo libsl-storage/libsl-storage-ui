@@ -25,8 +25,8 @@
     </div>
 
     <PopUp :visible="newSpecPopUpVisible" header="New specification" :modal="true" :closable="false" :draggable="false"
-        style="width: 90%; height: 90%">
-        <NewSpecPage @created="newSpecPopUpVisible = false" @cancel="cancelNewSpecPopUpVisible = true" />
+        style="width: 70%; height: 90%">
+        <NewSpecPage @save="newSpecPopUpVisible = false" @cancel="cancelNewSpecPopUpVisible = true" @close="newSpecPopUpVisible = false" />
     </PopUp>
 
     <PopUp v-model:visible="cancelNewSpecPopUpVisible" header="Cancel" :modal="true" :draggable="false">
