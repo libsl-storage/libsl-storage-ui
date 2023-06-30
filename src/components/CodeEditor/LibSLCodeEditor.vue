@@ -38,6 +38,10 @@ export default {
             type: String,
             default: ""
         },
+        errors: {
+            type: Object,
+            default: new Object()
+        },
         readonly: {
             type: Boolean,
             default: true
@@ -149,13 +153,14 @@ export default {
         code_handler() { // code highlighting and row counting
             let highlighted = ""
             let row_ctr = 1
-            let STATES = {"code": 0, "single_quote": 1, "double_quote": 2, "single_line_comment": 3, "multi_line_comment": 4}
+            let STATES = {"code": 0, "single_quote": 1, "double_quote": 2, "single_line_comment": 3, "multi_line_comment": 4, "error": 5}
             let state = STATES.code
             let start_index = 0
             for (let i = 0; i < this.code.length; i++) {
                 if (this.code.charAt(i) == "\n") row_ctr++
                 switch (state) {
                     case STATES.code:
+                        if (i in this.errors) state = STATES.error
                         if (this.code.charAt(i) == "'") state = STATES.single_quote
                         if (this.code.charAt(i) == "\"") state = STATES.double_quote
                         if (this.code.charAt(i) == "/" && this.code.charAt(i + 1) == "/") state = STATES.single_line_comment
@@ -195,6 +200,16 @@ export default {
                             state = STATES.code
                         }
                         break
+                    case STATES.error:
+                        if (i == this.errors[start_index]) {
+
+                            console.log(this.code.slice(start_index, i + 1))
+
+                            highlighted += "<span style='text-decoration: red wavy underline'>" + this.code.slice(start_index, i + 1).replaceAll("<", "&#60;") + "</span>"
+                            start_index = i + 1
+                            state = STATES.code
+                        }
+                        break
                 }
             }
             this.$refs.highlighter.innerHTML = highlighted
@@ -213,6 +228,9 @@ export default {
             this.code = this.content
         },
         code() { 
+            this.code_handler()
+        },
+        errors() {
             this.code_handler()
         }
     }

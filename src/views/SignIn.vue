@@ -33,8 +33,14 @@
         </div>
       </div>
       <div style="display: flex; justify-content: space-around; margin-top: 0.5em">
-        <Button icon="pi sign-in-with-google-icon" label="Google" text />
-        <Button icon="pi sign-in-with-github-icon" label="GitHub" text />
+        <a :href="getRedirectURL()">
+          <img src="@/assets/sign_in_with_google.svg" style="width: 16px; height: 16px" />
+          <span style="margin-left: 0.2em">Google</span>
+        </a>
+        <a :href="getRedirectURL()">
+          <img src="@/assets/sign_in_with_github.svg" style="width: 18px; height: 18px" />
+          <span style="margin-left: 0.2em">Github</span>
+        </a>
       </div>
       <div style="display: flex; flex: 1; justify-content: center; margin-top: 0.6em">
         <Button label="Create account" class="p-button-link" style="padding: 0.1em"
@@ -63,7 +69,7 @@ export default {
       if (r.status == 200) {
         this.$router.replace({"path": "/"})
         this.setAuth(true)
-      } else if (r.status == 400) {
+      } else if (r.status == 403) { // 400
         this.$toast.add({severity: "error", summary: "Authentication failed", life: 5000})
         this.login = ""
         this.password = ""
@@ -71,6 +77,9 @@ export default {
     },
     sign_up() {
       this.$router.push({ path: "/sign-up" })
+    },
+    getRedirectURL() {
+      return process.env.VUE_APP_REDIRECT_URLS
     },
     ...mapActions([
       "setAuth"
@@ -96,15 +105,7 @@ export default {
   border-radius: 10px;
 }
 
-.sign-in-with-google-icon {
-  background: url("@/assets/sign_in_with_google.svg");
-  height: 18px;
-  width: 18px;
-}
-
-.sign-in-with-github-icon {
-  background: url("@/assets/sign_in_with_github.svg");
-  height: 18px;
-  width: 18px;
+a {
+  color: #0b7ad1;
 }
 </style>

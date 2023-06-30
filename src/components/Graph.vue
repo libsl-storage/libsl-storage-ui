@@ -25,7 +25,6 @@ export default {
     methods: {
       drawGraph() {
         if (!this.selected_graph) return
-        
         this.cy = cytoscape({
           container: document.getElementById("canvas"),
           autoungrabify: true,
@@ -34,7 +33,7 @@ export default {
             .stylesheet()
             .selector("node")
             .css({
-              "shape": "rectangle",
+              "shape": "ellipse",
               "border-width": 1,
               "border-color": "black",
               "background-color": "white",

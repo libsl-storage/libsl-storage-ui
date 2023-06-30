@@ -7,8 +7,8 @@
             </div>
             <div style="width: 8em; text-align: center; border-bottom: 1px solid" :title="username">
                 <p style="overflow: hidden; text-overflow: ellipsis; margin: 0em">
-                {{username}}
-                <Skeleton v-show="!username" style="padding: 0.6em 0px" />
+                  {{username}}
+                  <Skeleton v-show="!username" style="padding: 0.6em 0px" />
                 </p>
             </div>
             <Button class="p-button-text" icon="pi pi-pencil" title="Change username"
@@ -29,11 +29,12 @@
             <Button class="p-button-link" label="Change password" style="padding: 0em"
                 @click="showChangePasswordPopUp" />
           </div>
+          <!--
           <div class="setting">
             <Button class="p-button-text p-button-danger" label="Delete account"
                 style="padding: 0em"
                 @click="showDeleteAccountPopUp" />
-          </div>
+          </div>-->
       </div>
     </div>
   
@@ -159,19 +160,6 @@
         return success
       },
       async delete_account() {
-        let response = await this.makeRequest(
-          "/delete_account",
-          {"password": this.current_password},
-          "DELETE"
-        )
-        if (response.status == 200) {
-          this.$toast.add({severity: "info", summary: "Account deleted", life: 5000})
-          sessionStorage.setItem("authenticated", false)
-          this.$router.replace({"path": "/"})
-        }
-        else {
-          this.$toast.add({severity: "error", summary: await response.text(), life: 5000})
-        }
         this.deleteAccountPopUpVisible = false
       },
       showChangeUsernamePopUp() {

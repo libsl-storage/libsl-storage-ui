@@ -1,7 +1,11 @@
 export default [
-    "library",
+    "libsl",
+	"library",
+	"version",
     "import",
 	"include",
+	"language",
+	"url",
     "types",
     "automaton",
     "fun",

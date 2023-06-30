@@ -2,7 +2,7 @@
     <div id="libsl-storage">
         <div id="header">
             <div id="title">
-                <div style="cursor: pointer" @click="$router.push({path: '/'})">
+                <div style="display: flex; align-items: center; cursor: pointer" @click="$router.push({path: '/'})">
                     LibSL Storage
                 </div>
             </div>
@@ -25,18 +25,8 @@
     </div>
 
     <PopUp :visible="newSpecPopUpVisible" header="New specification" :modal="true" :closable="false" :draggable="false"
-        style="width: 70%; height: 90%">
-        <NewSpecPage @save="newSpecPopUpVisible = false" @cancel="cancelNewSpecPopUpVisible = true" @close="newSpecPopUpVisible = false" />
-    </PopUp>
-
-    <PopUp v-model:visible="cancelNewSpecPopUpVisible" header="Cancel" :modal="true" :draggable="false">
-        <div>
-            Your changes will be lost. Are you sure you want to continue?
-        </div>
-        <template #footer>
-            <Button label="No" @click="cancelNewSpecPopUpVisible = false" />
-            <Button label="Yes" @click="cancelNewSpecPopUpVisible = false; newSpecPopUpVisible = false"/>
-         </template>
+        style="width: 90%; height: 90%">
+        <SpecContentForm @response="newSpecPopUpVisible = false; search()" />
     </PopUp>
 
     <PopUp :visible="signOutPopUpVisible" @keydown.esc="signOutPopUpVisible = false"
@@ -53,13 +43,16 @@
 
 <script>
 import Menu from "primevue/menu"
-import NewSpecPage from "@/components/Pages/NewSpecPage.vue"
+import SpecContentForm from "@/components/SpecContentForm.vue"
 import { mapGetters, mapActions } from "vuex"
 export default {
     name: "v-libsl-storage",
     components: {
         Menu,
-        NewSpecPage
+        SpecContentForm
+    },
+    mounted() {
+        this.init()
     },
     data() {
         return {
@@ -90,11 +83,14 @@ export default {
                 }
             ],
             newSpecPopUpVisible: false,
-            cancelNewSpecPopUpVisible: false,
             signOutPopUpVisible: false
         }
     },
     methods: {
+        async init() {
+            await this.fetchSearchFilters()
+            await this.search()
+        },
         sign_in() {
             this.$router.push({path: "/sign-in"})
         },
@@ -108,6 +104,8 @@ export default {
             this.$router.replace({path: "/"})
         },
         ...mapActions([
+            "fetchSearchFilters",
+            "search",
             "setAuth"
         ])
     },
@@ -138,7 +136,6 @@ export default {
 #title {
     display: flex;
     flex: 1;
-    align-items: center;
 }
 
 #user {

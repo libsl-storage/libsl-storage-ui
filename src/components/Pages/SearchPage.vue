@@ -3,90 +3,81 @@
         <div id="search-options-panel" :class="{'search-options-panel-mobile': isMobile,
             'search-options-panel-mobile-visible': isMobile && search_options_mobile_visible}">
             <div style="display: flex; flex-flow: column; flex: 1">
-                <MultiSelect v-model="selected_filters" :options="filters" optionLabel="title" placeholder="Select filters" display="chip" />
-                <div v-for="item in selected_filters" :key="item.id" class="filter-item">
-                    <InputText v-model="item.value" style="flex: 1" :placeholder="item.title" @keydown.enter="applyFilters(0)" />
+                <div v-show="isMobile" style="display: flex; justify-content: end; margin-bottom: 0.5em">
+                    <Button icon="pi pi-times" label="Close" text @click="search_options_mobile_visible = false" />
+                </div>
+                <MultiSelect v-model="selectedFilters" :options="getSearchFilters" optionLabel="title"
+                    placeholder="Select filters" display="chip" style="margin-bottom: 1em" />
+                <div v-for="item in selectedFilters" :key="item.id" class="filter-item">
+                    <span class="p-input-icon-right" style="flex: 1">
+                        <i class="pi pi-times" style="cursor: pointer" @click="item.value = ''" />
+                        <InputText v-model="item.value" style="flex: 1" :placeholder="item.title" @keydown.enter="search(0)" />
+                    </span>
                 </div>
             </div>
-            <div style="display: flex; justify-content: center; margin-top: 1.5em">
-                <Button id="search-options-btn" label="Apply filters" @click="applyFilters(0)" />
+            <div style="display: flex; flex-flow: column; align-items: center; margin-top: 1.5em">
+                <Button label="Apply filters" style="margin-bottom: 1em" @click="search_options_mobile_visible = false; search(0)" />
+                <div id="reset-btn" @click="search_options_mobile_visible = false; selectedFilters = []">
+                    Reset
+                </div>
             </div>
         </div>
         <div v-show="isDesktop || (isMobile && !search_options_mobile_visible)" id="result-panel">
             <div v-show="isMobile" style="display: flex; justify-content: end;">
-                <Button id="search-options-btn" icon="pi pi-sliders-h" label="Filters" link
-                    @click="search_options_mobile_visible = !search_options_mobile_visible" />
+                <Button icon="pi pi-sliders-h" label="Filters" text @click="search_options_mobile_visible = true" />
             </div>
-            <div v-show="searchResult.length == 0" style="display: flex; flex: 1; justify-content: center; align-items: center; color: grey">
-                Use filters to search for specifications
+            <div v-show="getSearchResult.totalPages == 0" style="display: flex; flex: 1; justify-content: center; align-items: center; color: grey">
+                Nothing found
             </div>
-            <div v-show="searchResult.length != 0" id="list">
-                <SearchResultItem v-for="item in searchResult.content" :key="item.id"
-                    :label="item.name" :path="item.path" :tags="item.tags"
-                    @click="$router.push({'path': '/spec/' + item.id})" />
+            <div v-show="getSearchResult.totalPages > 0" style="display: flex; flex: 1; overflow: hidden">
+                <div style="flex: 1; position: relative; overflow: auto">
+                    <div style="position: absolute; width: 100%">
+                        <DataTable :value="this.getSearchResult.content" v-model:selection="selectedSpec" selectionMode="single"
+                            showGridlines style="flex: 1">
+                            <Column field="name" header="Spec"></Column>
+                            <Column field="path" header="Path"></Column>
+                            <Column field="libslVersion" header="LibSL"></Column>
+                            <Column field="libraryName" header="Name"></Column>
+                            <Column field="libraryVersion" header="Version"></Column>
+                            <Column field="libraryLanguage" header="Language"></Column>
+                            <Column field="libraryURL" header="URL"></Column>
+                            <Column field="tags" header="Tags">
+                                <template #body="slotProps">
+                                    <Tag v-for="tag in slotProps.data.tags" :key="tag.id" class="tag" :value="tag.value" />
+                                </template>
+                            </Column>
+                        </DataTable>
+                    </div>
+                </div>
             </div>
-            <div v-show="searchResult.totalPages > 1" id="page-switch">
-                <Paginator v-model:first="paginator" :rows="searchResult.size" :totalRecords="searchResult.totalElements" />
+            <div v-show="getSearchResult.totalPages > 0" style="display: flex; margin-top: 0.5em">
+                <Paginator style="flex: 1" v-model:first="paginator" :rows="getSearchResult.size" :totalRecords="getSearchResult.totalElements" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import SearchResultItem from "@/components/SearchResultItem.vue"
-import Paginator from "primevue/paginator"
 import { mapGetters, mapActions } from "vuex"
 export default {
     name: "v-search",
-    components: {
-        SearchResultItem,
-        Paginator
-    },
     mounted() {
-        this.filters = this.getFilters
-        if (this.filters.length == 0) this.fetchFilters()
-        this.selected_filters = this.getSelectedFilters
-        this.searchResult = this.getSearchResult
+        this.selectedFilters = this.getSelectedFilters
+        this.paginator = this.getPaginator
     },
     data() {
         return {
             search_options_mobile_visible: false,
-            filters: [],
-            selected_filters: [],
-            searchResult: [],
+            selectedFilters: [],
+            selectedSpec: null,
             paginator: 0
         }
     },
     methods: {
-        async fetchFilters() {
-            let r = await this.makeRequest("/specification/page/filters", "GET")
-            let data = await r.json()
-            this.filters = []
-            for (const item in data.keys) {
-                this.filters.push({"title": data.keys[item].title, "key": data.keys[item].key, "value": ""})
-            }
-            this.setFilters(this.filters)
-        },
-        async applyFilters(page_number) {
-            let filter_list = []
-            this.selected_filters.forEach((item) => {
-                filter_list.push({"key": item.key, "value": item.value})
-            })
-            let r = await this.makeRequest("/specification/page", "POST", {
-                "page": page_number,
-                "filters": filter_list
-            })
-            this.searchResult = await r.json()
-            this.setSearchResult(this.searchResult)
-
-            if (this.isMobile) {
-                this.search_options_mobile_visible = !this.search_options_mobile_visible
-            }
-        },
         ...mapActions([
-            "setFilters",
             "setSelectedFilters",
-            "setSearchResult"
+            "search",
+            "setPaginator"
         ])
     },
     computed: {
@@ -94,17 +85,25 @@ export default {
             "isDesktop",
             "isMobile",
             "isAuthenticated",
-            "getFilters",
+            "getSearchFilters",
             "getSelectedFilters",
-            "getSearchResult"
+            "getSearchResult",
+            "getPaginator"
         ])
     },
     watch: {
-        selected_filters() {
-            this.setSelectedFilters(this.selected_filters)
+        selectedFilters(newValue, oldValue) {
+            if (newValue.length != oldValue.length) {
+                this.setSelectedFilters(this.selectedFilters)
+                if (this.selectedFilters.length == 0) this.search(0) // reset filters
+            }
+        },
+        selectedSpec() {
+            this.$router.push({'path': '/spec/' + this.selectedSpec.id})
         },
         paginator() {
-            this.applyFilters(this.paginator / this.searchResult.size)
+            this.search(this.paginator / this.getSearchResult.size)
+            this.setPaginator(this.paginator)
         }
     }
 }
@@ -123,9 +122,8 @@ export default {
     display: flex;
     flex-flow: column;
     width: 16em;
-    margin-top: 0.5em;
     margin-right: 1em;
-    padding: 1em 0.5em;
+    padding: 0.5em;
     border-radius: 0.25em;
     background-color: white;
     box-shadow: 0px 0px 4px 1px rgba(0, 0, 0, 0.1);
@@ -152,20 +150,23 @@ export default {
 
 .filter-item {
     display: flex;
-    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+#reset-btn {
+    color: #E34234;
+    cursor: pointer;
+}
+
+#reset-btn:hover {
+    text-decoration: #E34234 solid underline;
 }
 
 #list {
-    display: flex;
-    flex-flow: column;
-    flex: 1;
-    padding: 0em 0.5em;
-    overflow: auto;
+    position: relative
 }
 
-#page-switch {
-    display: flex;
-    justify-content: center;
-    margin-top: 1em;
+.tag {
+    margin-right: 0.5em;
 }
 </style>

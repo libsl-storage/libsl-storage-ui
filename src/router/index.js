@@ -16,11 +16,6 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
-        path: "new-specification",
-        component: () => import('@/components/Pages/NewSpecPage.vue'),
-        meta: { requiresAuth: true }
-      },
-      {
         path: "/spec/:id",
         component: () => import('@/components/Pages/SpecPage.vue')
       }
