@@ -5,9 +5,6 @@
                 <div>
                     <Button icon="pi pi-chevron-left" title="Back" @click="back"/>
                 </div>
-                <div id="spec-name" :title="name">
-                    {{ name }}
-                </div>
                 <div>
                     <Button v-show="canEdit" icon="pi pi-pencil" title="Edit" text @click="editSpecPopUpVisible = true" />
                     <Button v-show="canDelete" icon="pi pi-trash"  title="Delete" text severity="danger"
@@ -18,15 +15,15 @@
                 <Card class="meta-info-block">
                     <template #content>
                         <div class="meta-info-item">
+                            <span class="meta-info-item-name">Name:</span>
+                            <div style="word-wrap: anywhere">{{name}}</div>
+                        </div>
+                        <div class="meta-info-item">
                             <span class="meta-info-item-name">Path:</span>
                             <div style="word-wrap: anywhere">{{path}}</div>
                         </div>
                         <div class="meta-info-item">
-                            <span class="meta-info-item-name">LibSL:</span>
-                            <div style="word-wrap: anywhere">{{libslVersion}}</div>
-                        </div>
-                        <div class="meta-info-item">
-                            <span class="meta-info-item-name">Name:</span>
+                            <span class="meta-info-item-name">Library:</span>
                             <div style="word-wrap: anywhere">{{libraryName}}</div>
                         </div>
                         <div class="meta-info-item">
@@ -40,6 +37,10 @@
                         <div class="meta-info-item">
                             <span class="meta-info-item-name">URL:</span>
                             <div style="word-wrap: anywhere">{{libraryURL}}</div>
+                        </div>
+                        <div class="meta-info-item">
+                            <span class="meta-info-item-name">LibSL version:</span>
+                            <div style="word-wrap: anywhere">{{libslVersion}}</div>
                         </div>
                         <div v-show="tags.length" class="meta-info-item">
                             <span class="meta-info-item-name">Tags:</span>
